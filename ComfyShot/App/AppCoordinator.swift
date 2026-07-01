@@ -11,12 +11,21 @@ import SnapCore
 @MainActor
 class AppCoordinator {
     
+    private let windowCoordinator = WindowCoordinator()
+    private let defaultsManager = DefaultsManager()
     private let menuBarCoordinator = MenuBarCoordinator()
     private let hotkeyCoordinator = HotKeyCoordinator()
     private let userImageCoordinator = UserImageCoordinator()
     private let screenshotService = ScreenshotService()
     
-    private lazy var captureAreaCoordinator = CaptureAreaCoordinator(screenshot: screenshotService)
+    private lazy var captureAreaCoordinator = CaptureAreaCoordinator(
+        defaultsManager: defaultsManager,
+        screenshot: screenshotService
+    )
+    private lazy var settingsCoordinator = SettingsCoordinator(
+        windowCoordinator: windowCoordinator,
+        defaultsManager: defaultsManager
+    )
     
     init() {
         
@@ -37,9 +46,15 @@ class AppCoordinator {
             self.captureAreaCoordinator.show()
         }
         
+        let onOpenSettings = { [weak self] in
+            guard let self else { return }
+            self.settingsCoordinator.open()
+        }
+        
         menuBarCoordinator.start(
             onCaptureScreen: onCaptureScreen,
-            onCaptureArea: onCaptureArea
+            onCaptureArea: onCaptureArea,
+            onOpenSettings: onOpenSettings
         )
         
         captureAreaCoordinator.onCaptureImage = { [weak self] image, screen in

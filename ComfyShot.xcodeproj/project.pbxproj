@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		9BD9DA392FF463950057344F /* SnapCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DA382FF463950057344F /* SnapCore */; };
 		9BD9DA6D2FF46E210057344F /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DA6C2FF46E210057344F /* KeyboardShortcuts */; };
+		9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DAC12FF4E8FC0057344F /* Defaults */; };
+		9BD9DAC42FF4E8FC0057344F /* DefaultsMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DAC32FF4E8FC0057344F /* DefaultsMacros */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,8 +29,10 @@
 		000000000000000130000000 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */,
 				9BD9DA392FF463950057344F /* SnapCore in Frameworks */,
 				9BD9DA6D2FF46E210057344F /* KeyboardShortcuts in Frameworks */,
+				9BD9DAC42FF4E8FC0057344F /* DefaultsMacros in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -70,6 +74,8 @@
 			packageProductDependencies = (
 				9BD9DA382FF463950057344F /* SnapCore */,
 				9BD9DA6C2FF46E210057344F /* KeyboardShortcuts */,
+				9BD9DAC12FF4E8FC0057344F /* Defaults */,
+				9BD9DAC32FF4E8FC0057344F /* DefaultsMacros */,
 			);
 			productName = MyApp;
 			productReference = 000000000000000000000120 /* ComfyShot.app */;
@@ -102,6 +108,7 @@
 			packageReferences = (
 				9BD9DA372FF463950057344F /* XCLocalSwiftPackageReference "../SnapCore" */,
 				9BD9DA6B2FF46E210057344F /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+				9BD9DAC02FF4E8FC0057344F /* XCRemoteSwiftPackageReference "Defaults" */,
 			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 000000000000000000000020 /* Products */;
@@ -377,6 +384,14 @@
 				minimumVersion = 3.0.1;
 			};
 		};
+		9BD9DAC02FF4E8FC0057344F /* XCRemoteSwiftPackageReference "Defaults" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/Defaults.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.9;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -388,6 +403,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9BD9DA6B2FF46E210057344F /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
 			productName = KeyboardShortcuts;
+		};
+		9BD9DAC12FF4E8FC0057344F /* Defaults */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9BD9DAC02FF4E8FC0057344F /* XCRemoteSwiftPackageReference "Defaults" */;
+			productName = Defaults;
+		};
+		9BD9DAC32FF4E8FC0057344F /* DefaultsMacros */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9BD9DAC02FF4E8FC0057344F /* XCRemoteSwiftPackageReference "Defaults" */;
+			productName = DefaultsMacros;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

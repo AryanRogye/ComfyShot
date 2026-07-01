@@ -10,14 +10,18 @@ import SnapCore
 import SwiftUI
 
 final class CaptureAreaCoordinator {
+    private let defaultsManager: DefaultsManager
     private let screenshot    : any ScreenshotProviding
     private var overlayScreens: [NSPanel] = []
+    private var overlayContexts: [OverlayContext] = []
+    private let appleScreenshotInputBridge = AppleScreenshotInputBridge()
     private var pendingHide   : DispatchWorkItem?
     
     public var onCaptureImage: ((CGImage, NSScreen) -> Void)?
     public var onCaptureFinished: (() -> Void)?
     
-    public init(screenshot: any ScreenshotProviding) {
+    public init(defaultsManager: DefaultsManager, screenshot: any ScreenshotProviding) {
+        self.defaultsManager = defaultsManager
         self.screenshot = screenshot
     }
 
@@ -27,13 +31,14 @@ final class CaptureAreaCoordinator {
             return
         }
 
-        overlayScreens.forEach { $0.orderOut(nil) }
-        overlayScreens = NSScreen.screens.map { screen in
-            makeOverlay(for: screen)
+        closeOverlayPanels()
+        overlayContexts = NSScreen.screens.map { screen in
+            makeOverlayContext(for: screen)
         }
+        overlayScreens = overlayContexts.map(\.panel)
     }
 
-    private func makeOverlay(for screen: NSScreen) -> NSPanel {
+    private func makeOverlayContext(for screen: NSScreen) -> OverlayContext {
         let overlayScreen = FocusablePanel(
             contentRect: .zero,
             styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
@@ -48,10 +53,8 @@ final class CaptureAreaCoordinator {
         overlayScreen.title = ""
         overlayScreen.acceptsMouseMovedEvents = true
         
-        let screenSaverRaw = CGWindowLevelForKey(.screenSaverWindow)
-        overlayScreen.level = NSWindow.Level(rawValue: Int(screenSaverRaw))
-        
-        overlayScreen.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        overlayScreen.level = NSWindow.Level(rawValue: Int(1600))
+        overlayScreen.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
         overlayScreen.isMovableByWindowBackground = false
         overlayScreen.backgroundColor = .clear
         overlayScreen.isOpaque = false
@@ -101,7 +104,11 @@ final class CaptureAreaCoordinator {
             }
         }
 
-        return overlayScreen
+        return OverlayContext(
+            screen: screen,
+            panel: overlayScreen,
+            model: model
+        )
     }
     
     // MARK: - Show Hide Overlay
@@ -129,9 +136,25 @@ final class CaptureAreaCoordinator {
             overlayScreen.ignoresMouseEvents = false
             applyCrosshairCursor(to: overlayScreen)
         }
+        
+        if defaultsManager.captureOverAppleScreenshotUI {
+            appleScreenshotInputBridge.startIfNeeded(
+                contexts: overlayContexts,
+                onCancel: { [weak self] in
+                    self?.hide()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) { [weak self] in
+                        self?.onCaptureFinished?()
+                    }
+                }
+            )
+        }
     }
     
     public func hide() {
+        if defaultsManager.captureOverAppleScreenshotUI {
+            appleScreenshotInputBridge.stop()
+        }
+        
         guard !overlayScreens.isEmpty else {
             print("Cant Hide, Overlay is nil")
             return
@@ -160,6 +183,20 @@ final class CaptureAreaCoordinator {
         }
 
         NSCursor.crosshair.set()
+    }
+
+    private func closeOverlayPanels() {
+        guard !overlayScreens.isEmpty else { return }
+
+        if defaultsManager.captureOverAppleScreenshotUI {
+            appleScreenshotInputBridge.stop()
+        }
+        overlayScreens.forEach {
+            $0.orderOut(nil)
+            $0.close()
+        }
+        overlayScreens = []
+        overlayContexts = []
     }
 
     private func overlayForMouse() -> NSPanel? {

@@ -16,13 +16,16 @@ final class MenuBarCoordinator: NSObject {
     
     var onCaptureScreen: (() -> Void)?
     var onCaptureArea: (() -> Void)?
+    var onOpenSettings: (() -> Void)?
     
     public func start(
         onCaptureScreen: @escaping () -> Void,
-        onCaptureArea: @escaping () -> Void
+        onCaptureArea: @escaping () -> Void,
+        onOpenSettings: @escaping () -> Void
     ) {
         self.onCaptureArea = onCaptureArea
         self.onCaptureScreen = onCaptureScreen
+        self.onOpenSettings = onOpenSettings
         configureStatusItem()
         configureMenu()
     }
@@ -40,6 +43,7 @@ final class MenuBarCoordinator: NSObject {
     }
     
     @objc private func openSettings(_ sender: NSMenuItem) {
+        onOpenSettings?()
     }
     
     @objc private func captureScreen(_ sender: NSMenuItem) {
