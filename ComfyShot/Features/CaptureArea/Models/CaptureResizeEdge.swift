@@ -11,4 +11,8 @@ enum CaptureResizeEdge {
     case bottom
     case leading
     case trailing
+    case topLeading
+    case topTrailing
+    case bottomLeading
+    case bottomTrailing
 }

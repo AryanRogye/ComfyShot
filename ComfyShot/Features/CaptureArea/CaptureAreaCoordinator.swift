@@ -94,6 +94,14 @@ final class CaptureAreaCoordinator {
                 onCaptureFinished?()
             }
         }
+
+        model.onSelectionBegan = { [weak self, weak model] in
+            guard let self, let model else { return }
+
+            self.overlayContexts
+                .filter { $0.model !== model }
+                .forEach { $0.model.clearSelection() }
+        }
         
         model.onExit = { [weak self] in
             guard let self else { return }

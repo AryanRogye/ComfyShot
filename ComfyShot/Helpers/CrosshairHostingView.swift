@@ -14,11 +14,19 @@ enum CaptureCursorOverride {
     private static var cursor: NSCursor?
     
     static func setResizeUpDown() {
-        set(.resizeUpDown)
+        set(.frameResize(position: .top, directions: .all))
     }
     
     static func setResizeLeftRight() {
-        set(.resizeLeftRight)
+        set(.frameResize(position: .left, directions: .all))
+    }
+
+    static func setResizeTopLeftBottomRight() {
+        set(.frameResize(position: .topLeft, directions: .all))
+    }
+
+    static func setResizeTopRightBottomLeft() {
+        set(.frameResize(position: .topRight, directions: .all))
     }
     
     static func setOpenHand() {
@@ -48,6 +56,10 @@ final class CrosshairHostingView<Content: View>: NSHostingView<Content> {
     
     private var currentCursor: NSCursor {
         CaptureCursorOverride.current(default: .crosshair)
+    }
+
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
+        true
     }
     
     override func resetCursorRects() {

@@ -42,7 +42,7 @@ struct SelectionOverlay: View {
                     path.addRect(rect)
                 }
             }
-            .fill(Color.black.opacity(0.5), style: FillStyle(eoFill: true))
+            .fill(Color.black.opacity(0.9), style: FillStyle(eoFill: true))
         }
     }
 

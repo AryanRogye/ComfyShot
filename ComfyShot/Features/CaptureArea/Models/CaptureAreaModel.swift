@@ -21,6 +21,7 @@ final class CaptureAreaModel {
 
     var capture: ((CGRect) -> Void)?
     var onExit: (() -> Void)?
+    var onSelectionBegan: (() -> Void)?
 
     var selectionRect: CGRect? {
         guard let dragStart, let dragCurrent else { return nil }
@@ -51,6 +52,7 @@ final class CaptureAreaModel {
     }
 
     func beginDrag(at point: CGPoint) {
+        onSelectionBegan?()
         dragStart = point
         dragCurrent = point
     }
@@ -109,6 +111,18 @@ final class CaptureAreaModel {
             minX = min(initialResizeRect.minX + translation.width, maxX - minimumSelectionLength)
         case .trailing:
             maxX = max(initialResizeRect.maxX + translation.width, minX + minimumSelectionLength)
+        case .topLeading:
+            minX = min(initialResizeRect.minX + translation.width, maxX - minimumSelectionLength)
+            minY = min(initialResizeRect.minY + translation.height, maxY - minimumSelectionLength)
+        case .topTrailing:
+            maxX = max(initialResizeRect.maxX + translation.width, minX + minimumSelectionLength)
+            minY = min(initialResizeRect.minY + translation.height, maxY - minimumSelectionLength)
+        case .bottomLeading:
+            minX = min(initialResizeRect.minX + translation.width, maxX - minimumSelectionLength)
+            maxY = max(initialResizeRect.maxY + translation.height, minY + minimumSelectionLength)
+        case .bottomTrailing:
+            maxX = max(initialResizeRect.maxX + translation.width, minX + minimumSelectionLength)
+            maxY = max(initialResizeRect.maxY + translation.height, minY + minimumSelectionLength)
         }
 
         dragStart = CGPoint(x: minX, y: minY)

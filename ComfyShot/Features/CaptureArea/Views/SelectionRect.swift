@@ -7,18 +7,208 @@
 
 import SwiftUI
 
+struct SelectionShape: View {
+    
+    private struct DashSegment {
+        let from: CGPoint
+        let to: CGPoint
+        let color: Color
+    }
+    
+    var primaryColor: Color {
+        Color(red: 0.82, green: 0.82, blue: 0.84)
+    }
+    
+    var secondaryColor: Color {
+        Color.black
+    }
+    
+    var strokeColor: Color {
+        .white
+    }
+    
+    var circleSize: CGFloat {
+        6
+    }
+    
+    var rectStrokeWidth: CGFloat {
+        2
+    }
+    
+    var body: some View {
+        GeometryReader { proxy in
+            let rect = CGRect(origin: .zero, size: proxy.size)
+            
+            ZStack {
+                
+                /// Left
+                line(
+                    from: CGPoint(x: rect.minX, y: rect.minY),
+                    to: CGPoint(x: rect.minX, y: rect.maxY)
+                )
+                
+                /// Top
+                line(
+                    from: CGPoint(x: rect.minX, y: rect.minY),
+                    to: CGPoint(x: rect.maxX, y: rect.minY)
+                )
+                
+                /// right
+                line(
+                    from: CGPoint(x: rect.maxX, y: rect.minY),
+                    to: CGPoint(x: rect.maxX, y: rect.maxY)
+                )
+                
+                /// Bottom
+                line(
+                    from: CGPoint(x: rect.minX, y: rect.maxY),
+                    to: CGPoint(x: rect.maxX, y: rect.maxY)
+                )
+                
+                /// top left
+                circle(at: .init(x: rect.minX, y: rect.minY))
+                
+                /// top right
+                circle(at: .init(x: rect.maxX, y: rect.minY))
+                
+                /// bottom right
+                circle(at: .init(x: rect.maxX, y: rect.maxY))
+                
+                /// bottom left
+                circle(at: .init(x: rect.minX, y: rect.maxY))
+            }
+        }
+    }
+    
+    
+    private func line(from start: CGPoint, to end: CGPoint) -> some View {
+        let segments = dashSegments(from: start, to: end)
+        
+        return ZStack {
+            ForEach(segments.indices, id: \.self) { index in
+                let segment = segments[index]
+                
+                Path { path in
+                    path.move(to: segment.from)
+                    path.addLine(to: segment.to)
+                }
+                .stroke(segment.color, lineWidth: 1.1)
+            }
+        }
+    }
+    
+    private func circle(at point: CGPoint) -> some View {
+        Circle()
+            .fill(primaryColor)
+            .frame(
+                width: circleSize,
+                height: circleSize
+            )
+            .position(x: point.x, y: point.y)
+            .overlay {
+                Circle()
+                    .stroke(
+                        strokeColor,
+                        style: .init(
+                            lineWidth: 1
+                        )
+                    )
+                    .frame(
+                        width: circleSize,
+                        height: circleSize
+                    )
+                    .position(x: point.x, y: point.y)
+            }
+    }
+    
+    private func dashSegments(from start: CGPoint, to end: CGPoint) -> [DashSegment] {
+        let dx = end.x - start.x
+        let dy = end.y - start.y
+        let length = hypot(dx, dy)
+        
+        guard length > 0 else {
+            return []
+        }
+        
+        let unitX = dx / length
+        let unitY = dy / length
+        
+        func point(at distance: CGFloat) -> CGPoint {
+            CGPoint(
+                x: start.x + unitX * distance,
+                y: start.y + unitY * distance
+            )
+        }
+        
+        var segments: [DashSegment] = []
+        
+        var distance: CGFloat = 0
+        var index = 0
+        
+        let firstSegmentLength: CGFloat = 7
+        let lastSegmentLength: CGFloat = 7
+        let normalSegmentLength: CGFloat = 4
+        
+        let endOfNormalSegments = max(0, length - lastSegmentLength)
+        
+        while distance < endOfNormalSegments {
+            let currentLength = index == 0 ? firstSegmentLength : normalSegmentLength
+            
+            let segmentStart = distance
+            let segmentEnd = min(distance + currentLength, endOfNormalSegments)
+            
+            let color: Color = index.isMultiple(of: 2) ? .black : .white
+            
+            segments.append(
+                DashSegment(
+                    from: point(at: segmentStart),
+                    to: point(at: segmentEnd),
+                    color: color
+                )
+            )
+            
+            distance += currentLength
+            index += 1
+        }
+        
+        segments.append(
+            DashSegment(
+                from: point(at: endOfNormalSegments),
+                to: point(at: length),
+                color: .black
+            )
+        )
+
+        
+        return segments
+    }
+}
+
+#Preview {
+    ZStack {
+        Color.black.opacity(0.8).ignoresSafeArea()
+        
+        VStack {
+            SelectionShape()
+                .frame(width: 100, height: 100)
+        }
+        .frame(maxWidth: 200, maxHeight: 200)
+    }
+}
+
 struct SelectionRect: View {
     @Bindable var model: CaptureAreaModel
     let rect: CGRect
     let sizeText: String?
     @State private var isHoveringSelection = false
-    @State private var hoveredEdge: Edge?
+    @State private var hoveredResizeEdge: CaptureResizeEdge?
     private let edgeHitWidth: CGFloat = 8
+    private let cornerHitSize: CGFloat = 18
 
     var body: some View {
         ZStack {
-            Rectangle()
-                .fill(Color.white.opacity(0.15))
+            SelectionShape()
+                .contentShape(Rectangle())
                 .onHover { hovering in
                     isHoveringSelection = hovering
 
@@ -30,8 +220,8 @@ struct SelectionRect: View {
                 }
                 .gesture(moveGesture)
 
-            Rectangle()
-                .stroke(.white, lineWidth: 2)
+            SelectionShape()
+                .contentShape(Rectangle())
                 .allowsHitTesting(false)
 
             edgeHoverAreas
@@ -57,24 +247,47 @@ struct SelectionRect: View {
             edgeHoverArea(.trailing)
                 .frame(width: edgeHitWidth)
                 .frame(maxWidth: .infinity, alignment: .trailing)
+
+            cornerHoverArea(.topLeading)
+                .frame(width: cornerHitSize, height: cornerHitSize)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
+            cornerHoverArea(.topTrailing)
+                .frame(width: cornerHitSize, height: cornerHitSize)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+
+            cornerHoverArea(.bottomLeading)
+                .frame(width: cornerHitSize, height: cornerHitSize)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+
+            cornerHoverArea(.bottomTrailing)
+                .frame(width: cornerHitSize, height: cornerHitSize)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
         }
     }
 
-    private func edgeHoverArea(_ edge: Edge) -> some View {
+    private func edgeHoverArea(_ edge: CaptureResizeEdge) -> some View {
+        resizeHoverArea(edge)
+    }
+
+    private func cornerHoverArea(_ edge: CaptureResizeEdge) -> some View {
+        resizeHoverArea(edge)
+    }
+
+    private func resizeHoverArea(_ edge: CaptureResizeEdge) -> some View {
         Rectangle()
             .fill(.clear)
             .contentShape(Rectangle())
             .onHover { hovering in
-                hoveredEdge = hovering ? edge : nil
-                if hoveredEdge == .top || hoveredEdge == .bottom {
-                    CaptureCursorOverride.setResizeUpDown()
-                }
-                else if hoveredEdge == .leading || hoveredEdge == .trailing {
-                    CaptureCursorOverride.setResizeLeftRight()
-                } else {
+                if hovering {
+                    hoveredResizeEdge = edge
+                    setResizeCursor(for: edge)
+                } else if hoveredResizeEdge == edge {
+                    hoveredResizeEdge = nil
                     CaptureCursorOverride.clear()
+                } else {
+                    return
                 }
-                print("Hovering Over Stroke: \(hovering)")
             }
             .gesture(resizeGesture(for: edge))
     }
@@ -96,19 +309,19 @@ struct SelectionRect: View {
             }
     }
 
-    private func resizeGesture(for edge: Edge) -> some Gesture {
+    private func resizeGesture(for edge: CaptureResizeEdge) -> some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .global)
             .onChanged { value in
                 setResizeCursor(for: edge)
                 model.resizeSelection(
-                    edge: captureResizeEdge(for: edge),
+                    edge: edge,
                     translation: value.translation
                 )
             }
             .onEnded { _ in
                 model.endResize()
 
-                if hoveredEdge == edge {
+                if hoveredResizeEdge == edge {
                     setResizeCursor(for: edge)
                 } else {
                     CaptureCursorOverride.clear()
@@ -116,24 +329,16 @@ struct SelectionRect: View {
             }
     }
 
-    private func setResizeCursor(for edge: Edge) {
-        if edge == .top || edge == .bottom {
-            CaptureCursorOverride.setResizeUpDown()
-        } else {
-            CaptureCursorOverride.setResizeLeftRight()
-        }
-    }
-
-    private func captureResizeEdge(for edge: Edge) -> CaptureResizeEdge {
+    private func setResizeCursor(for edge: CaptureResizeEdge) {
         switch edge {
-        case .top:
-            return .top
-        case .bottom:
-            return .bottom
-        case .leading:
-            return .leading
-        case .trailing:
-            return .trailing
+        case .top, .bottom:
+            CaptureCursorOverride.setResizeUpDown()
+        case .leading, .trailing:
+            CaptureCursorOverride.setResizeLeftRight()
+        case .topLeading, .bottomTrailing:
+            CaptureCursorOverride.setResizeTopLeftBottomRight()
+        case .topTrailing, .bottomLeading:
+            CaptureCursorOverride.setResizeTopRightBottomLeft()
         }
     }
 
