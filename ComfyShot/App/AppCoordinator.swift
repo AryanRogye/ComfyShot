@@ -11,12 +11,18 @@ import SnapCore
 @MainActor
 class AppCoordinator {
     
+    private let permissionService = PermissionService()
     private let windowCoordinator = WindowCoordinator()
     private let defaultsManager = DefaultsManager()
     private let menuBarCoordinator = MenuBarCoordinator()
     private let hotkeyCoordinator = HotKeyCoordinator()
     private let userImageCoordinator = UserImageCoordinator()
     private let screenshotService = ScreenshotService()
+    
+    private lazy var permissionCoordinator = PermissionCoordinator(
+        permissionSerivce: permissionService,
+        windowCoordinator: windowCoordinator
+    )
     
     private lazy var captureAreaCoordinator = CaptureAreaCoordinator(
         defaultsManager: defaultsManager,
@@ -28,6 +34,11 @@ class AppCoordinator {
     )
     
     init() {
+        
+        if !permissionService.isAccessibilityEnabled {
+            /// show permission
+            permissionCoordinator.open()
+        }
         
         /// we'll create closures since menuBarCoordinator and hotkeys both use the same thing
         let onCaptureScreen = { [weak self] in
@@ -46,15 +57,23 @@ class AppCoordinator {
             self.captureAreaCoordinator.show()
         }
         
+        let onScrollingCapture = { [weak self] in
+            guard let self else { return }
+            self.userImageCoordinator.hideAll()
+            self.captureAreaCoordinator.show(withScrollCapture: true)
+        }
+
         let onOpenSettings = { [weak self] in
             guard let self else { return }
             self.settingsCoordinator.open()
         }
         
+        
         menuBarCoordinator.start(
             onCaptureScreen: onCaptureScreen,
             onCaptureArea: onCaptureArea,
-            onOpenSettings: onOpenSettings
+            onOpenSettings: onOpenSettings,
+            onScrollingCapture: onScrollingCapture,
         )
         
         captureAreaCoordinator.onCaptureImage = { [weak self] image, screen in
@@ -67,7 +86,8 @@ class AppCoordinator {
         
         hotkeyCoordinator.start(
             onCaptureScreen: onCaptureScreen,
-            onCaptureArea: onCaptureArea
+            onCaptureArea: onCaptureArea,
+            onScrollingCapture: onScrollingCapture
         )
     }
 

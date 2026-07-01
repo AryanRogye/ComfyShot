@@ -10,15 +10,25 @@ import SnapCore
 import SwiftUI
 
 final class CaptureAreaCoordinator {
+    
     private let defaultsManager: DefaultsManager
     private let screenshot    : any ScreenshotProviding
-    private var overlayScreens: [NSPanel] = []
-    private var overlayContexts: [OverlayContext] = []
-    private let appleScreenshotInputBridge = AppleScreenshotInputBridge()
-    private var pendingHide   : DispatchWorkItem?
-    
+
+    /// set by `AppCoordinator`
     public var onCaptureImage: ((CGImage, NSScreen) -> Void)?
     public var onCaptureFinished: (() -> Void)?
+
+    private lazy var appleScreenshotInputBridge = AppleScreenshotInputBridge()
+    private lazy var scrollingCaptureService = ScrollingCaptureService(
+        screenshot: screenshot
+    )
+    
+    private var overlayScreens: [NSPanel] = []
+    private var overlayContexts: [OverlayContext] = []
+    private var pendingHide   : DispatchWorkItem?
+
+    private var isStartingScrollCapture: Bool = false
+
     
     public init(defaultsManager: DefaultsManager, screenshot: any ScreenshotProviding) {
         self.defaultsManager = defaultsManager
@@ -54,7 +64,9 @@ final class CaptureAreaCoordinator {
         overlayScreen.acceptsMouseMovedEvents = true
         
         overlayScreen.level = NSWindow.Level(rawValue: Int(1600))
-        overlayScreen.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+        overlayScreen.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
+        overlayScreen.isFloatingPanel = true
+        overlayScreen.hidesOnDeactivate = false
         overlayScreen.isMovableByWindowBackground = false
         overlayScreen.backgroundColor = .clear
         overlayScreen.isOpaque = false
@@ -77,21 +89,51 @@ final class CaptureAreaCoordinator {
 
         model.capture = { [weak self] rect in
             guard let self else { return }
-            
-            self.hide()
-            
+
+            let scrollCapture = self.isStartingScrollCapture
+            let captureTarget = self.captureTarget(for: rect, on: screen)
+            let targetPoint = self.accessibilityTargetPoint(
+                for: captureTarget.rect,
+                on: captureTarget.screen
+            )
+
+            if scrollCapture {
+                self.hideImmediatelyForScrollingCapture()
+            } else {
+                self.hide()
+            }
+
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                let captureTarget = self.captureTarget(for: rect, on: screen)
-                if let image = await screenshot.takeScreenshot(
-                    of: captureTarget.screen,
-                    croppingTo: captureTarget.rect
-                ) {
-                    onCaptureImage?(image, captureTarget.screen)
-//                    let text = await OCRService.extractText(from: image)
-//                    self.showPreviewImage(image, with: text)
+
+                if scrollCapture {
+                    try? await Task.sleep(nanoseconds: 300_000_000)
+
+                    let result = await self.scrollingCaptureService.capture(
+                        screen: captureTarget.screen,
+                        rect: captureTarget.rect,
+                        targetPoint: targetPoint
+                    )
+
+                    switch result {
+                    case .failure:
+                        break
+                    case .partial(let image, reason: _):
+                        self.onCaptureImage?(image, captureTarget.screen)
+                    case .success(let image):
+                        self.onCaptureImage?(image, captureTarget.screen)
+                    }
+
+                    self.onCaptureFinished?()
+                } else {
+                    if let image = await self.screenshot.takeScreenshot(
+                        of: captureTarget.screen,
+                        croppingTo: captureTarget.rect
+                    ) {
+                        self.onCaptureImage?(image, captureTarget.screen)
+                    }
+                    self.onCaptureFinished?()
                 }
-                onCaptureFinished?()
             }
         }
 
@@ -120,15 +162,17 @@ final class CaptureAreaCoordinator {
     }
     
     // MARK: - Show Hide Overlay
-    public func show() {
+    public func show(withScrollCapture: Bool = false) {
         pendingHide?.cancel()
         pendingHide = nil
-
+        
         guard !NSScreen.screens.isEmpty else {
             print("Can't show, no screens")
             return
         }
         
+        isStartingScrollCapture = withScrollCapture
+
         setupOverlay()
         
         guard let keyOverlay = overlayForMouse() ?? overlayScreens.first else { return }
@@ -159,6 +203,7 @@ final class CaptureAreaCoordinator {
     }
     
     public func hide() {
+        isStartingScrollCapture = false
         if defaultsManager.captureOverAppleScreenshotUI {
             appleScreenshotInputBridge.stop()
         }
@@ -181,6 +226,15 @@ final class CaptureAreaCoordinator {
             pendingHide = workItem
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15, execute: workItem)
         }
+    }
+
+    private func hideImmediatelyForScrollingCapture() {
+        pendingHide?.cancel()
+        pendingHide = nil
+        isStartingScrollCapture = false
+
+        closeOverlayPanels()
+        NSCursor.arrow.set()
     }
 
     private func applyCrosshairCursor(to overlayScreen: NSPanel) {
@@ -214,5 +268,22 @@ final class CaptureAreaCoordinator {
 
     private func captureTarget(for overlayRect: CGRect, on screen: NSScreen) -> (screen: NSScreen, rect: CGRect) {
         return (screen, overlayRect.standardized)
+    }
+
+    private func accessibilityTargetPoint(for overlayRect: CGRect, on screen: NSScreen) -> CGPoint {
+        let rect = overlayRect.standardized
+
+        guard let displayID = screen.displayID else {
+            return CGPoint(
+                x: screen.frame.minX + rect.midX,
+                y: screen.frame.minY + rect.midY
+            )
+        }
+
+        let displayBounds = CGDisplayBounds(displayID)
+        return CGPoint(
+            x: displayBounds.minX + rect.midX,
+            y: displayBounds.minY + rect.midY
+        )
     }
 }

@@ -17,15 +17,18 @@ final class MenuBarCoordinator: NSObject {
     var onCaptureScreen: (() -> Void)?
     var onCaptureArea: (() -> Void)?
     var onOpenSettings: (() -> Void)?
+    var onScrollingCapture: (() -> Void)?
     
     public func start(
         onCaptureScreen: @escaping () -> Void,
         onCaptureArea: @escaping () -> Void,
-        onOpenSettings: @escaping () -> Void
+        onOpenSettings: @escaping () -> Void,
+        onScrollingCapture: @escaping () -> Void
     ) {
         self.onCaptureArea = onCaptureArea
         self.onCaptureScreen = onCaptureScreen
         self.onOpenSettings = onOpenSettings
+        self.onScrollingCapture = onScrollingCapture
         configureStatusItem()
         configureMenu()
     }
@@ -40,6 +43,10 @@ final class MenuBarCoordinator: NSObject {
     }
     
     @objc private func quit(_ sender: NSMenuItem) {
+    }
+    
+    @objc private func scrollingCapture(_ sender: NSMenuItem) {
+        onScrollingCapture?()
     }
     
     @objc private func openSettings(_ sender: NSMenuItem) {
@@ -94,6 +101,13 @@ extension MenuBarCoordinator {
             systemImageName: "viewfinder",
             shortcut: KeyboardShortcuts.Name.captureArea.shortcut,
             action: #selector(captureArea(_:))
+        ))
+        
+        menu.addItem(makeMenuItem(
+            title: "Scrolling Capture",
+            systemImageName: "arrow.up.and.down.text.horizontal",
+            shortcut: KeyboardShortcuts.Name.scrollingCapture.shortcut,
+            action: #selector(scrollingCapture(_:))
         ))
         
         menu.addItem(.separator())

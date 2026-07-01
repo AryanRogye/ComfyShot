@@ -17,6 +17,10 @@ extension KeyboardShortcuts.Name {
         "CaptureArea",
         initial: .init(.two, modifiers: [.command, .shift])
     )
+    static let scrollingCapture = Self(
+        "ScrollingCapture",
+        initial: .init(.backtick, modifiers: [.command, .shift])
+    )
 }
 
 
@@ -26,13 +30,17 @@ final class HotKeyCoordinator {
     
     func start(
         onCaptureScreen: @escaping () -> Void,
-        onCaptureArea: @escaping () -> Void
+        onCaptureArea: @escaping () -> Void,
+        onScrollingCapture: @escaping () -> Void
     ) {
         KeyboardShortcuts.onKeyDown(for: .captureScreen) {
             onCaptureScreen()
         }
         KeyboardShortcuts.onKeyDown(for: .captureArea) {
             onCaptureArea()
+        }
+        KeyboardShortcuts.onKeyDown(for: .scrollingCapture) {
+            onScrollingCapture()
         }
     }
 }

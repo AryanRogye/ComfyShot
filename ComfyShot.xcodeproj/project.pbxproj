@@ -10,7 +10,6 @@
 		9BD9DA392FF463950057344F /* SnapCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DA382FF463950057344F /* SnapCore */; };
 		9BD9DA6D2FF46E210057344F /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DA6C2FF46E210057344F /* KeyboardShortcuts */; };
 		9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DAC12FF4E8FC0057344F /* Defaults */; };
-		9BD9DAC42FF4E8FC0057344F /* DefaultsMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DAC32FF4E8FC0057344F /* DefaultsMacros */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,7 +31,6 @@
 				9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */,
 				9BD9DA392FF463950057344F /* SnapCore in Frameworks */,
 				9BD9DA6D2FF46E210057344F /* KeyboardShortcuts in Frameworks */,
-				9BD9DAC42FF4E8FC0057344F /* DefaultsMacros in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -75,7 +73,6 @@
 				9BD9DA382FF463950057344F /* SnapCore */,
 				9BD9DA6C2FF46E210057344F /* KeyboardShortcuts */,
 				9BD9DAC12FF4E8FC0057344F /* Defaults */,
-				9BD9DAC32FF4E8FC0057344F /* DefaultsMacros */,
 			);
 			productName = MyApp;
 			productReference = 000000000000000000000120 /* ComfyShot.app */;
@@ -276,9 +273,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B9P888266K;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -294,6 +290,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "devplaceholder.$(PROJECT_UNIQUE_VALUE:identifier).$(PRODUCT_NAME:identifier)";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = com.aryanrogye.ComfyShot;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -315,9 +312,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B9P888266K;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -333,6 +329,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "devplaceholder.$(PROJECT_UNIQUE_VALUE:identifier).$(PRODUCT_NAME:identifier)";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = com.aryanrogye.ComfyShot;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -408,11 +405,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9BD9DAC02FF4E8FC0057344F /* XCRemoteSwiftPackageReference "Defaults" */;
 			productName = Defaults;
-		};
-		9BD9DAC32FF4E8FC0057344F /* DefaultsMacros */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 9BD9DAC02FF4E8FC0057344F /* XCRemoteSwiftPackageReference "Defaults" */;
-			productName = DefaultsMacros;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

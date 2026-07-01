@@ -138,6 +138,7 @@ struct SelectionOverlay: View {
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
                     .padding(8)
+                    .padding(.horizontal, 4)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)

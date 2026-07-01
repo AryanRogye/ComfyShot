@@ -18,7 +18,7 @@ final class CaptureAreaModel {
     private var initialMoveCurrent: CGPoint?
     private var initialResizeRect: CGRect?
     private let minimumSelectionLength: CGFloat = 1
-
+    
     var capture: ((CGRect) -> Void)?
     var onExit: (() -> Void)?
     var onSelectionBegan: (() -> Void)?
