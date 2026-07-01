@@ -7,183 +7,6 @@
 
 import SwiftUI
 
-struct SelectionShape: View {
-    
-    private struct DashSegment {
-        let from: CGPoint
-        let to: CGPoint
-        let color: Color
-    }
-    
-    var primaryColor: Color {
-        Color(red: 0.82, green: 0.82, blue: 0.84)
-    }
-    
-    var secondaryColor: Color {
-        Color.black
-    }
-    
-    var strokeColor: Color {
-        .white
-    }
-    
-    var circleSize: CGFloat {
-        6
-    }
-    
-    var rectStrokeWidth: CGFloat {
-        2
-    }
-    
-    var body: some View {
-        GeometryReader { proxy in
-            let rect = CGRect(origin: .zero, size: proxy.size)
-            
-            ZStack {
-                
-                /// Left
-                line(
-                    from: CGPoint(x: rect.minX, y: rect.minY),
-                    to: CGPoint(x: rect.minX, y: rect.maxY)
-                )
-                
-                /// Top
-                line(
-                    from: CGPoint(x: rect.minX, y: rect.minY),
-                    to: CGPoint(x: rect.maxX, y: rect.minY)
-                )
-                
-                /// right
-                line(
-                    from: CGPoint(x: rect.maxX, y: rect.minY),
-                    to: CGPoint(x: rect.maxX, y: rect.maxY)
-                )
-                
-                /// Bottom
-                line(
-                    from: CGPoint(x: rect.minX, y: rect.maxY),
-                    to: CGPoint(x: rect.maxX, y: rect.maxY)
-                )
-                
-                /// top left
-                circle(at: .init(x: rect.minX, y: rect.minY))
-                
-                /// top right
-                circle(at: .init(x: rect.maxX, y: rect.minY))
-                
-                /// bottom right
-                circle(at: .init(x: rect.maxX, y: rect.maxY))
-                
-                /// bottom left
-                circle(at: .init(x: rect.minX, y: rect.maxY))
-            }
-        }
-    }
-    
-    
-    private func line(from start: CGPoint, to end: CGPoint) -> some View {
-        let segments = dashSegments(from: start, to: end)
-        
-        return ZStack {
-            ForEach(segments.indices, id: \.self) { index in
-                let segment = segments[index]
-                
-                Path { path in
-                    path.move(to: segment.from)
-                    path.addLine(to: segment.to)
-                }
-                .stroke(segment.color, lineWidth: 1.1)
-            }
-        }
-    }
-    
-    private func circle(at point: CGPoint) -> some View {
-        Circle()
-            .fill(primaryColor)
-            .frame(
-                width: circleSize,
-                height: circleSize
-            )
-            .position(x: point.x, y: point.y)
-            .overlay {
-                Circle()
-                    .stroke(
-                        strokeColor,
-                        style: .init(
-                            lineWidth: 1
-                        )
-                    )
-                    .frame(
-                        width: circleSize,
-                        height: circleSize
-                    )
-                    .position(x: point.x, y: point.y)
-            }
-    }
-    
-    private func dashSegments(from start: CGPoint, to end: CGPoint) -> [DashSegment] {
-        let dx = end.x - start.x
-        let dy = end.y - start.y
-        let length = hypot(dx, dy)
-        
-        guard length > 0 else {
-            return []
-        }
-        
-        let unitX = dx / length
-        let unitY = dy / length
-        
-        func point(at distance: CGFloat) -> CGPoint {
-            CGPoint(
-                x: start.x + unitX * distance,
-                y: start.y + unitY * distance
-            )
-        }
-        
-        var segments: [DashSegment] = []
-        
-        var distance: CGFloat = 0
-        var index = 0
-        
-        let firstSegmentLength: CGFloat = 7
-        let lastSegmentLength: CGFloat = 7
-        let normalSegmentLength: CGFloat = 4
-        
-        let endOfNormalSegments = max(0, length - lastSegmentLength)
-        
-        while distance < endOfNormalSegments {
-            let currentLength = index == 0 ? firstSegmentLength : normalSegmentLength
-            
-            let segmentStart = distance
-            let segmentEnd = min(distance + currentLength, endOfNormalSegments)
-            
-            let color: Color = index.isMultiple(of: 2) ? .black : .white
-            
-            segments.append(
-                DashSegment(
-                    from: point(at: segmentStart),
-                    to: point(at: segmentEnd),
-                    color: color
-                )
-            )
-            
-            distance += currentLength
-            index += 1
-        }
-        
-        segments.append(
-            DashSegment(
-                from: point(at: endOfNormalSegments),
-                to: point(at: length),
-                color: .black
-            )
-        )
-
-        
-        return segments
-    }
-}
-
 #Preview {
     ZStack {
         Color.black.opacity(0.8).ignoresSafeArea()
@@ -211,7 +34,7 @@ struct SelectionRect: View {
                 .contentShape(Rectangle())
                 .onHover { hovering in
                     isHoveringSelection = hovering
-
+                    
                     if hovering {
                         CaptureCursorOverride.setOpenHand()
                     } else {
@@ -219,11 +42,7 @@ struct SelectionRect: View {
                     }
                 }
                 .gesture(moveGesture)
-
-            SelectionShape()
-                .contentShape(Rectangle())
-                .allowsHitTesting(false)
-
+            
             edgeHoverAreas
         }
         .frame(width: rect.width, height: rect.height)
@@ -346,5 +165,189 @@ struct SelectionRect: View {
         Circle()
             .fill(.red)
             .frame(width: 7, height: 7)
+    }
+}
+
+struct SelectionShape: View {
+    
+    private struct DashSegment {
+        let from: CGPoint
+        let to: CGPoint
+        let color: Color
+    }
+    
+    var primaryColor: Color {
+        Color(red: 0.82, green: 0.82, blue: 0.84)
+    }
+    
+    var secondaryColor: Color {
+        Color.black
+    }
+    
+    var strokeColor: Color {
+        .white
+    }
+    
+    var circleSize: CGFloat {
+        6
+    }
+    
+    var rectStrokeWidth: CGFloat {
+        2
+    }
+    
+    var body: some View {
+        Canvas { context, size in
+            let rect = CGRect(origin: .zero, size: size)
+            
+            
+            
+            /// Left
+            dashedLine(
+                from: CGPoint(x: rect.minX, y: rect.minY),
+                to: CGPoint(x: rect.minX, y: rect.maxY),
+                context: &context
+            )
+            
+            /// Top
+            dashedLine(
+                from: CGPoint(x: rect.minX, y: rect.minY),
+                to: CGPoint(x: rect.maxX, y: rect.minY),
+                context: &context
+            )
+            
+            /// right
+            dashedLine(
+                from: CGPoint(x: rect.maxX, y: rect.minY),
+                to: CGPoint(x: rect.maxX, y: rect.maxY),
+                context: &context
+            )
+            
+            /// Bottom
+            dashedLine(
+                from: CGPoint(x: rect.minX, y: rect.maxY),
+                to: CGPoint(x: rect.maxX, y: rect.maxY),
+                context: &context
+            )
+            
+            for corner in [CGPoint(x: rect.minX, y: rect.minY), CGPoint(x: rect.maxX, y: rect.minY),
+                           CGPoint(x: rect.maxX, y: rect.maxY), CGPoint(x: rect.minX, y: rect.maxY)] {
+                let circlePath = Path(ellipseIn: CGRect(x: corner.x - circleSize/2, y: corner.y - circleSize/2, width: circleSize, height: circleSize))
+                context.fill(circlePath, with: .color(primaryColor))
+                context.stroke(circlePath, with: .color(strokeColor), lineWidth: 1)
+            }
+        }
+    }
+    
+    
+    private func line(from start: CGPoint, to end: CGPoint) -> some View {
+        let segments = dashSegments(from: start, to: end)
+        
+        return ZStack {
+            ForEach(segments.indices, id: \.self) { index in
+                let segment = segments[index]
+                
+                Path { path in
+                    path.move(to: segment.from)
+                    path.addLine(to: segment.to)
+                }
+                .stroke(segment.color, lineWidth: 1.1)
+            }
+        }
+    }
+    
+    private func circle(at point: CGPoint) -> some View {
+        Circle()
+            .fill(primaryColor)
+            .frame(
+                width: circleSize,
+                height: circleSize
+            )
+            .position(x: point.x, y: point.y)
+            .overlay {
+                Circle()
+                    .stroke(
+                        strokeColor,
+                        style: .init(
+                            lineWidth: 1
+                        )
+                    )
+                    .frame(
+                        width: circleSize,
+                        height: circleSize
+                    )
+                    .position(x: point.x, y: point.y)
+            }
+    }
+    
+    private func dashedLine(from start: CGPoint, to end: CGPoint, context: inout GraphicsContext) {
+        for segment in dashSegments(from: start, to: end) {
+            var path = Path()
+            path.move(to: segment.from)
+            path.addLine(to: segment.to)
+            context.stroke(path, with: .color(segment.color), lineWidth: 1.1)
+        }
+    }
+    
+    private func dashSegments(from start: CGPoint, to end: CGPoint) -> [DashSegment] {
+        let dx = end.x - start.x
+        let dy = end.y - start.y
+        let length = hypot(dx, dy)
+        
+        guard length > 0 else {
+            return []
+        }
+        
+        let unitX = dx / length
+        let unitY = dy / length
+        
+        func point(at distance: CGFloat) -> CGPoint {
+            CGPoint(
+                x: start.x + unitX * distance,
+                y: start.y + unitY * distance
+            )
+        }
+        
+        var segments: [DashSegment] = []
+        
+        var distance: CGFloat = 0
+        var index = 0
+        
+        let firstSegmentLength: CGFloat = 7
+        let lastSegmentLength: CGFloat = 7
+        let normalSegmentLength: CGFloat = 4
+        
+        let endOfNormalSegments = max(0, length - lastSegmentLength)
+        
+        while distance < endOfNormalSegments {
+            let currentLength = index == 0 ? firstSegmentLength : normalSegmentLength
+            
+            let segmentStart = distance
+            let segmentEnd = min(distance + currentLength, endOfNormalSegments)
+            
+            let color: Color = index.isMultiple(of: 2) ? .black : .white
+            
+            segments.append(
+                DashSegment(
+                    from: point(at: segmentStart),
+                    to: point(at: segmentEnd),
+                    color: color
+                )
+            )
+            
+            distance += currentLength
+            index += 1
+        }
+        
+        segments.append(
+            DashSegment(
+                from: point(at: endOfNormalSegments),
+                to: point(at: length),
+                color: .black
+            )
+        )
+        
+        
+        return segments
     }
 }

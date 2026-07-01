@@ -46,13 +46,61 @@ struct SelectionOverlay: View {
         }
     }
 
+    private let minimumSelectionDragDistance: CGFloat = 6
+    
+    @State private var didCaptureGestureStart = false
+    @State private var gestureStartSelectionRect: CGRect?
+    @State private var isDrawingNewSelection = false
+    
     private var dragGesture: some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
+                if !didCaptureGestureStart {
+                    didCaptureGestureStart = true
+                    gestureStartSelectionRect = model.selectionRect
+                    isDrawingNewSelection = false
+                }
+                
+                if isDrawingNewSelection {
+                    model.updateDrag(to: value.location)
+                    return
+                }
+                
+                if let existingRect = gestureStartSelectionRect,
+                   existingRect.width > 0,
+                   existingRect.height > 0 {
+                    
+                    // If drag started inside the selected rect, don't create a new selection.
+                    // This lets your move/resize flow own that interaction.
+                    if existingRect.contains(value.startLocation) {
+                        return
+                    }
+                    
+                    // If there already is a selection, require intent before replacing it.
+                    let distance = hypot(value.translation.width, value.translation.height)
+                    
+                    guard distance >= minimumSelectionDragDistance else {
+                        return
+                    }
+                }
+                
+                // No existing selection? Start immediately.
+                // Existing selection outside rect? Start only after threshold.
                 model.beginDrag(at: value.startLocation)
                 model.updateDrag(to: value.location)
+                isDrawingNewSelection = true
             }
             .onEnded { value in
+                defer {
+                    didCaptureGestureStart = false
+                    gestureStartSelectionRect = nil
+                    isDrawingNewSelection = false
+                }
+                
+                guard isDrawingNewSelection else {
+                    return
+                }
+                
                 model.endDrag(at: value.location)
             }
     }
