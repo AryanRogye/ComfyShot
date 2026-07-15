@@ -74,6 +74,7 @@ final class DisplayImageStack {
             // screenshot is added. Only the SwiftUI root view needs updating.
             hostingView.rootView = view
             panel.setFrame(screen.frame, display: true)
+            configureSpaceBehavior(for: panel)
             panel.orderFrontRegardless()
             return
         }
@@ -89,6 +90,7 @@ final class DisplayImageStack {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.level = .floating
+        configureSpaceBehavior(for: panel)
         panel.hasShadow = false
 
         let hostingView = NSHostingView(rootView: view)
@@ -127,5 +129,15 @@ final class DisplayImageStack {
             bottomInset: visibleFrame.minY - screenFrame.minY + padding.bottomPadding,
             maxHeight: max(1, visibleFrame.height - padding.topPadding * 2)
         )
+    }
+
+    private func configureSpaceBehavior(for panel: NSPanel) {
+        panel.collectionBehavior = [
+            .canJoinAllSpaces,
+            .fullScreenAuxiliary,
+            .ignoresCycle
+        ]
+        panel.isFloatingPanel = true
+        panel.hidesOnDeactivate = false
     }
 }

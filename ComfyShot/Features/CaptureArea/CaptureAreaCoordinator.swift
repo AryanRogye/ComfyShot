@@ -25,6 +25,7 @@ final class CaptureAreaCoordinator {
     
     private var overlayScreens: [NSPanel] = []
     private var overlayContexts: [OverlayContext] = []
+    private var models: [CGDirectDisplayID: CaptureAreaModel] = [:]
     private var pendingHide   : DispatchWorkItem?
 
     private var isStartingScrollCapture: Bool = false
@@ -42,6 +43,7 @@ final class CaptureAreaCoordinator {
         }
 
         closeOverlayPanels()
+        removeModelsForDisconnectedDisplays()
         overlayContexts = NSScreen.screens.map { screen in
             makeOverlayContext(for: screen)
         }
@@ -72,7 +74,11 @@ final class CaptureAreaCoordinator {
         overlayScreen.isOpaque = false
         overlayScreen.hasShadow = false
 
-        let model = CaptureAreaModel()
+        let model = model(for: screen)
+        model.constrainSelection(
+            to: CGRect(origin: .zero, size: screen.frame.size)
+        )
+
         let view: NSView = CrosshairHostingView(
             rootView: SelectionOverlay(
                 model: model
@@ -159,6 +165,25 @@ final class CaptureAreaCoordinator {
             panel: overlayScreen,
             model: model
         )
+    }
+
+    private func model(for screen: NSScreen) -> CaptureAreaModel {
+        guard let displayID = screen.displayID else {
+            return CaptureAreaModel()
+        }
+
+        if let model = models[displayID] {
+            return model
+        }
+
+        let model = CaptureAreaModel()
+        models[displayID] = model
+        return model
+    }
+
+    private func removeModelsForDisconnectedDisplays() {
+        let connectedDisplayIDs = Set(NSScreen.screens.compactMap(\.displayID))
+        models = models.filter { connectedDisplayIDs.contains($0.key) }
     }
     
     // MARK: - Show Hide Overlay

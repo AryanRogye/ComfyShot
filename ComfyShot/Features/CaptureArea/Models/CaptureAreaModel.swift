@@ -69,6 +69,21 @@ final class CaptureAreaModel {
         dragStart = nil
         dragCurrent = nil
     }
+
+    func constrainSelection(to bounds: CGRect) {
+        guard let selectionRect else { return }
+
+        let constrainedRect = selectionRect.standardized.intersection(bounds.standardized)
+        guard !constrainedRect.isNull,
+              constrainedRect.width >= minimumSelectionLength,
+              constrainedRect.height >= minimumSelectionLength else {
+            clearSelection()
+            return
+        }
+
+        dragStart = constrainedRect.origin
+        dragCurrent = CGPoint(x: constrainedRect.maxX, y: constrainedRect.maxY)
+    }
     
     func moveSelection(translation: CGSize) {
         // Capture the initial state on the first frame of the drag

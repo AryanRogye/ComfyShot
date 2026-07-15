@@ -43,6 +43,16 @@ final class MenuBarCoordinator: NSObject {
     }
     
     @objc private func quit(_ sender: NSMenuItem) {
+        let alert = AlertMaker.makeAlert(
+            messageText: "Quit ComfyShot?",
+            informativeText: "Are you sure you want to quit?",
+            style: .warning,
+            buttons: ["Quit", "Cancel"]
+        )
+        
+        if alert.runModal() == .alertFirstButtonReturn {
+            NSApp.terminate(nil)
+        }
     }
     
     @objc private func scrollingCapture(_ sender: NSMenuItem) {
