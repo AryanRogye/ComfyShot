@@ -14,6 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     public func applicationDidFinishLaunching(_ notification: Notification) {
         guard !ProcessInfo.isSwiftUIPreview else { return }
         
+        NSApplication.shared.setActivationPolicy(.accessory)
         appCoordinator = AppCoordinator()
     }
     
