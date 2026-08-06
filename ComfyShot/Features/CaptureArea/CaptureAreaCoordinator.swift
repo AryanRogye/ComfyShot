@@ -202,13 +202,13 @@ final class CaptureAreaCoordinator {
         
         guard let keyOverlay = overlayForMouse() ?? overlayScreens.first else { return }
 
-        NSApp.activate(ignoringOtherApps: true)
         for overlayScreen in overlayScreens {
             if overlayScreen === keyOverlay {
-                overlayScreen.makeKeyAndOrderFront(nil)
+                overlayScreen.orderFrontRegardless()
+                overlayScreen.makeKey()
                 overlayScreen.makeFirstResponder(overlayScreen.contentView)
             } else {
-                overlayScreen.orderFront(nil)
+                overlayScreen.orderFrontRegardless()
             }
             overlayScreen.ignoresMouseEvents = false
             applyCrosshairCursor(to: overlayScreen)

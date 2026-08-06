@@ -41,6 +41,8 @@ class AppCoordinator {
         }
         
         /// we'll create closures since menuBarCoordinator and hotkeys both use the same thing
+        
+        /// Capture Screen captures the entire screen where the users mouse is
         let onCaptureScreen = { [weak self] in
             guard let screen = ScreenHelpers.screenUnderMouse() else { return }
             Task { @MainActor [weak self] in
@@ -51,18 +53,21 @@ class AppCoordinator {
             }
         }
         
+        /// Capture Area triggers a box area that the user can select to decide where the screenshot will be
         let onCaptureArea = { [weak self] in
             guard let self else { return }
             self.userImageCoordinator.hideAll()
             self.captureAreaCoordinator.show()
         }
         
+        /// Scrolling Capture to capture scrolling in a area
         let onScrollingCapture = { [weak self] in
             guard let self else { return }
             self.userImageCoordinator.hideAll()
             self.captureAreaCoordinator.show(withScrollCapture: true)
         }
 
+        /// Open Settings
         let onOpenSettings = { [weak self] in
             guard let self else { return }
             self.settingsCoordinator.open()

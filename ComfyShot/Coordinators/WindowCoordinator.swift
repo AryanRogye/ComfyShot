@@ -81,6 +81,40 @@ fileprivate class WindowDelegate: NSObject, NSWindowDelegate {
     }
 }
 
+private class FocusableWindow: NSWindow {
+    override var canBecomeKey: Bool {
+        return true
+    }
+    
+    override var acceptsFirstResponder: Bool {
+        return true
+    }
+}
+
+/// Keeps system materials in their active visual state without making the
+/// nonactivating dock overlay participate in normal key-window event routing.
+private final class ActiveAppearanceView: FocusableWindow {
+    @objc(hasKeyAppearance)
+    private func activePublicKeyAppearance() -> Bool {
+        true
+    }
+    
+    @objc(_hasKeyAppearance)
+    private func activeKeyAppearance() -> Bool {
+        true
+    }
+    
+    @objc(_hasActiveAppearance)
+    private func activeAppearance() -> Bool {
+        true
+    }
+    
+    @objc(_hasActiveAppearanceIgnoringKeyFocus)
+    private func activeAppearanceIgnoringKeyFocus() -> Bool {
+        true
+    }
+}
+
 extension WindowCoordinator {
     
     /// Presents a managed window for the given ID, creating it if it doesn't exist or bringing it
@@ -96,6 +130,11 @@ extension WindowCoordinator {
     ///   - size: The initial size of the window. Defaults to 600×400. Ignored if the window already exists.
     ///   - origin: The window's initial screen position. If `nil`, the window is centered on screen.
     ///   - makeGlass: If `true`, applies a vibrancy/glass effect and clears the background. Defaults to `false`.
+    ///   - isMiniaturizable: If `true` shows the yellow traffic light to miniaturize the view
+    ///   - isCloseable: If `true` shows the red traffic light button to close the window
+    ///   - alwaysActiveFocusedLook: If `true`, the window always reports an active/key appearance,
+    ///     causing system materials and glass effects to retain their focused appearance even when
+    ///     the window is not key. This affects appearance only; it does not actually make the window key.
     ///   - onOpen: Called when the window first becomes key.
     ///   - onClose: Called when the window is closed.
     ///   - onBlur: Called when the window loses focus.
@@ -111,6 +150,9 @@ extension WindowCoordinator {
         size: NSSize = .init(width: 600, height: 400),
         origin: CGPoint? = nil,
         makeGlass: Bool = false,
+        isMiniaturizable: Bool = false,
+        isCloseable: Bool = true,
+        alwaysActiveFocusedLook: Bool = false,
         onOpen: (() -> Void)? = nil,
         onClose: (() -> Void)? = nil,
         onBlur: (() -> Void)? = nil,
@@ -126,12 +168,30 @@ extension WindowCoordinator {
         
         let windowOrigin = origin ?? .zero
         
-        let window = NSWindow(
-            contentRect: NSRect(origin: windowOrigin, size: size),
-            styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
-            backing: .buffered,
-            defer: false
-        )
+        var styleMask: NSWindow.StyleMask = [.titled, .resizable, .fullSizeContentView]
+        if isMiniaturizable {
+            styleMask.insert(.miniaturizable)
+        }
+        if isCloseable {
+            styleMask.insert(.closable)
+        }
+        
+        let window: NSWindow
+        if alwaysActiveFocusedLook {
+            window = ActiveAppearanceView(
+                contentRect: NSRect(origin: windowOrigin, size: size),
+                styleMask: styleMask,
+                backing: .buffered,
+                defer: false
+            )
+        } else {
+            window = NSWindow(
+                contentRect: NSRect(origin: windowOrigin, size: size),
+                styleMask: styleMask,
+                backing: .buffered,
+                defer: false
+            )
+        }
         
         // Match SwiftUI window modifiers
         window.title = title
