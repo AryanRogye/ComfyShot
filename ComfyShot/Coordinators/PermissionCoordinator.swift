@@ -9,14 +9,17 @@ import SwiftUI
 
 class PermissionCoordinator {
     let windowCoordinator: WindowCoordinator
-    let permissionSerivce: PermissionService
-    
+    let permissionService: PermissionService
+    let onClose: () -> Void
+
     init(
-        permissionSerivce: PermissionService,
-        windowCoordinator: WindowCoordinator
+        permissionService: PermissionService,
+        windowCoordinator: WindowCoordinator,
+        onClose: @escaping () -> Void
     ) {
-        self.permissionSerivce = permissionSerivce
+        self.permissionService = permissionService
         self.windowCoordinator = windowCoordinator
+        self.onClose = onClose
     }
     
     let id = UUID().uuidString
@@ -25,7 +28,20 @@ class PermissionCoordinator {
         windowCoordinator.showWindow(
             id: id,
             title: "Permissions",
-            content: PermissionView(permissionService: permissionSerivce)
+            content: PermissionView(
+                permissionService: permissionService,
+                onClose: { [weak self] in
+                    guard let self else { return }
+                    self.windowCoordinator.closeWindow(id: id)
+                    self.onClose()
+                }
+            ),
+            onClose: { [weak self] in
+                guard let self else { return }
+                if !permissionService.isAccessibilityEnabled || !permissionService.isScreenRecordingEnabled {
+                    NSApp.terminate(nil)
+                }
+            }
         )
     }
 }

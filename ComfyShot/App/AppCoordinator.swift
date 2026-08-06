@@ -11,8 +11,10 @@ import SnapCore
 @MainActor
 class AppCoordinator {
     
+    private lazy var windowCoordinator = WindowCoordinator()
+    
     private let permissionService = PermissionService()
-    private let windowCoordinator = WindowCoordinator()
+
     private let defaultsManager = DefaultsManager()
     private let menuBarCoordinator = MenuBarCoordinator()
     private let hotkeyCoordinator = HotKeyCoordinator()
@@ -20,8 +22,12 @@ class AppCoordinator {
     private let screenshotService = ScreenshotService()
     
     private lazy var permissionCoordinator = PermissionCoordinator(
-        permissionSerivce: permissionService,
-        windowCoordinator: windowCoordinator
+        permissionService: permissionService,
+        windowCoordinator: windowCoordinator,
+        onClose: { [weak self] in
+            guard let self else { return }
+            self.start()
+        }
     )
     
     private lazy var captureAreaCoordinator = CaptureAreaCoordinator(
@@ -34,12 +40,18 @@ class AppCoordinator {
     )
     
     init() {
-        
-        if !permissionService.isAccessibilityEnabled {
-            /// show permission
+        if !permissionService.isAccessibilityEnabled || !permissionService.isScreenRecordingEnabled {
             permissionCoordinator.open()
+        } else {
+            start()
         }
-        
+    }
+    
+    var didStart = false
+    
+    private func start() {
+        if didStart { return }
+        didStart = true
         /// we'll create closures since menuBarCoordinator and hotkeys both use the same thing
         
         /// Capture Screen captures the entire screen where the users mouse is
@@ -66,7 +78,7 @@ class AppCoordinator {
             self.userImageCoordinator.hideAll()
             self.captureAreaCoordinator.show(withScrollCapture: true)
         }
-
+        
         /// Open Settings
         let onOpenSettings = { [weak self] in
             guard let self else { return }
@@ -94,6 +106,7 @@ class AppCoordinator {
             onCaptureArea: onCaptureArea,
             onScrollingCapture: onScrollingCapture
         )
+
     }
 
     public func stop() {
