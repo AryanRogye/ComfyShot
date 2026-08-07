@@ -51,7 +51,7 @@ final class CaptureAreaCoordinator {
     }
 
     private func makeOverlayContext(for screen: NSScreen) -> OverlayContext {
-        let overlayScreen = FocusablePanel(
+        let overlayScreen = ActiveAppearancePanel(
             contentRect: .zero,
             styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
             backing: .buffered,
@@ -81,7 +81,8 @@ final class CaptureAreaCoordinator {
 
         let view: NSView = CrosshairHostingView(
             rootView: SelectionOverlay(
-                model: model
+                model: model,
+                defaultsManager: defaultsManager
             )
         )
         

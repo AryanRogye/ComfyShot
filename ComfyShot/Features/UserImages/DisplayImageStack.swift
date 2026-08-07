@@ -26,7 +26,7 @@ final class DisplayImageStack {
     
     /// Floating panel shown on the display.
     /// Created lazily the first time an image is added.
-    private var panel: FocusablePanel?
+    private var panel: NSPanel?
     
     /// Hosts the SwiftUI content inside the floating panel.
     /// Kept alive so the root view can be updated without recreating the panel.
@@ -79,7 +79,7 @@ final class DisplayImageStack {
             return
         }
 
-        let panel = FocusablePanel(
+        let panel = ActiveAppearancePanel(
             contentRect: .zero,
             styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
             backing: .buffered,

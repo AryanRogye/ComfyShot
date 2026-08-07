@@ -22,6 +22,12 @@ struct SettingsView: View {
                 """)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+                
+                Divider()
+                
+                Slider(value: $defaultsManager.selectionRectOpacity, in: 0.1...0.9, step: 0.1) {
+                    Text("Selection Rect Opacity: \(Int(defaultsManager.selectionRectOpacity * 100))%")
+                }
 
             }
         }

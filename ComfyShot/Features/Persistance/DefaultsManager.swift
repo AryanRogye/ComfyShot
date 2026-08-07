@@ -17,4 +17,10 @@ final class DefaultsManager {
             Defaults[.captureOverAppleScreenshotUI] = captureOverAppleScreenshotUI
         }
     }
+    
+    var selectionRectOpacity: CGFloat = Defaults[.selectionRectOpacity] {
+        didSet {
+            Defaults[.selectionRectOpacity] = selectionRectOpacity
+        }
+    }
 }

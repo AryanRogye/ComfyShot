@@ -19,3 +19,27 @@ class FocusablePanel: NSPanel {
         return true
     }
 }
+
+/// Keeps system materials in their active visual state without making the
+/// nonactivating dock overlay participate in normal key-window event routing.
+final class ActiveAppearancePanel: FocusablePanel {
+    @objc(hasKeyAppearance)
+    private func activePublicKeyAppearance() -> Bool {
+        true
+    }
+    
+    @objc(_hasKeyAppearance)
+    private func activeKeyAppearance() -> Bool {
+        true
+    }
+    
+    @objc(_hasActiveAppearance)
+    private func activeAppearance() -> Bool {
+        true
+    }
+    
+    @objc(_hasActiveAppearanceIgnoringKeyFocus)
+    private func activeAppearanceIgnoringKeyFocus() -> Bool {
+        true
+    }
+}

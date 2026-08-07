@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SelectionOverlay: View {
     @Bindable var model: CaptureAreaModel
+    @Bindable var defaultsManager: DefaultsManager
 
     var body: some View {
         ZStack {
@@ -42,7 +43,7 @@ struct SelectionOverlay: View {
                     path.addRect(rect)
                 }
             }
-            .fill(Color.black.opacity(0.9), style: FillStyle(eoFill: true))
+            .fill(Color.black.opacity(defaultsManager.selectionRectOpacity), style: FillStyle(eoFill: true))
         }
     }
 
