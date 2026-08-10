@@ -49,7 +49,7 @@ final class UserImageCoordinator {
     }
     
     /// function adds the image, and displays the panel onto the given screen
-    public func addImage(_ image: CGImage, to screen: NSScreen) {
+    public func add(_ image: CGImage, to screen: NSScreen) {
         guard let display = DisplayIdentity(screen: screen) else { return }
         
         let size = sizeForImage(image, on: screen)

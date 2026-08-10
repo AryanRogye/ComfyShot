@@ -23,7 +23,6 @@ final class CaptureAreaCoordinator {
         screenshot: screenshot
     )
     
-    private var overlayScreens: [NSPanel] = []
     private var overlayContexts: [OverlayContext] = []
     private var models: [CGDirectDisplayID: CaptureAreaModel] = [:]
     private var pendingHide   : DispatchWorkItem?
@@ -34,138 +33,6 @@ final class CaptureAreaCoordinator {
     public init(defaultsManager: DefaultsManager, screenshot: any ScreenshotProviding) {
         self.defaultsManager = defaultsManager
         self.screenshot = screenshot
-    }
-
-    private func setupOverlay() {
-        guard !NSScreen.screens.isEmpty else {
-            print("Cant SetupOverlay, No screens")
-            return
-        }
-
-        closeOverlayPanels()
-        removeModelsForDisconnectedDisplays()
-        overlayContexts = NSScreen.screens.map { screen in
-            makeOverlayContext(for: screen)
-        }
-        overlayScreens = overlayContexts.map(\.panel)
-    }
-
-    private func makeOverlayContext(for screen: NSScreen) -> OverlayContext {
-        let overlayScreen = ActiveAppearancePanel(
-            contentRect: .zero,
-            styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
-            backing: .buffered,
-            defer: false
-        )
-        overlayScreen.setFrame(screen.frame, display: true)
-        /// Allow content to draw outside panel bounds
-        overlayScreen.contentView?.wantsLayer = true
-        
-        overlayScreen.registerForDraggedTypes([.fileURL])
-        overlayScreen.title = ""
-        overlayScreen.acceptsMouseMovedEvents = true
-        
-        overlayScreen.level = NSWindow.Level(rawValue: Int(1600))
-        overlayScreen.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
-        overlayScreen.isFloatingPanel = true
-        overlayScreen.hidesOnDeactivate = false
-        overlayScreen.isMovableByWindowBackground = false
-        overlayScreen.backgroundColor = .clear
-        overlayScreen.isOpaque = false
-        overlayScreen.hasShadow = false
-
-        let model = model(for: screen)
-        model.constrainSelection(
-            to: CGRect(origin: .zero, size: screen.frame.size)
-        )
-
-        let view: NSView = CrosshairHostingView(
-            rootView: SelectionOverlay(
-                model: model,
-                defaultsManager: defaultsManager
-            )
-        )
-        
-        /// Allow hosting view to overflow
-        view.wantsLayer = true
-        view.layer?.masksToBounds = false
-        
-        overlayScreen.contentView = view
-        // Ensure key events route into SwiftUI hosting view
-        overlayScreen.initialFirstResponder = view
-
-        model.capture = { [weak self] rect in
-            guard let self else { return }
-
-            let scrollCapture = self.isStartingScrollCapture
-            let captureTarget = self.captureTarget(for: rect, on: screen)
-            let targetPoint = self.accessibilityTargetPoint(
-                for: captureTarget.rect,
-                on: captureTarget.screen
-            )
-
-            if scrollCapture {
-                self.hideImmediatelyForScrollingCapture()
-            } else {
-                self.hide()
-            }
-
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-
-                if scrollCapture {
-                    try? await Task.sleep(nanoseconds: 300_000_000)
-
-                    let result = await self.scrollingCaptureService.capture(
-                        screen: captureTarget.screen,
-                        rect: captureTarget.rect,
-                        targetPoint: targetPoint
-                    )
-
-                    switch result {
-                    case .failure:
-                        break
-                    case .partial(let image, reason: _):
-                        self.onCaptureImage?(image, captureTarget.screen)
-                    case .success(let image):
-                        self.onCaptureImage?(image, captureTarget.screen)
-                    }
-
-                    self.onCaptureFinished?()
-                } else {
-                    if let image = await self.screenshot.takeScreenshot(
-                        of: captureTarget.screen,
-                        croppingTo: captureTarget.rect
-                    ) {
-                        self.onCaptureImage?(image, captureTarget.screen)
-                    }
-                    self.onCaptureFinished?()
-                }
-            }
-        }
-
-        model.onSelectionBegan = { [weak self, weak model] in
-            guard let self, let model else { return }
-
-            self.overlayContexts
-                .filter { $0.model !== model }
-                .forEach { $0.model.clearSelection() }
-        }
-        
-        model.onExit = { [weak self] in
-            guard let self else { return }
-            self.hide()
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) { [weak self] in
-                self?.onCaptureFinished?()
-            }
-        }
-
-        return OverlayContext(
-            screen: screen,
-            panel: overlayScreen,
-            model: model
-        )
     }
 
     private func model(for screen: NSScreen) -> CaptureAreaModel {
@@ -182,11 +49,6 @@ final class CaptureAreaCoordinator {
         return model
     }
 
-    private func removeModelsForDisconnectedDisplays() {
-        let connectedDisplayIDs = Set(NSScreen.screens.compactMap(\.displayID))
-        models = models.filter { connectedDisplayIDs.contains($0.key) }
-    }
-    
     // MARK: - Show Hide Overlay
     public func show(withScrollCapture: Bool = false) {
         pendingHide?.cancel()
@@ -199,11 +61,12 @@ final class CaptureAreaCoordinator {
         
         isStartingScrollCapture = withScrollCapture
 
-        setupOverlay()
+        // setup all the overlays
+        setupOverlaysForAllScreens()
         
-        guard let keyOverlay = overlayForMouse() ?? overlayScreens.first else { return }
+        guard let keyOverlay = overlayForMouse() ?? overlayContexts.map(\.panel).first else { return }
 
-        for overlayScreen in overlayScreens {
+        for overlayScreen in overlayContexts.map(\.panel) {
             if overlayScreen === keyOverlay {
                 overlayScreen.orderFrontRegardless()
                 overlayScreen.makeKey()
@@ -234,17 +97,17 @@ final class CaptureAreaCoordinator {
             appleScreenshotInputBridge.stop()
         }
         
-        guard !overlayScreens.isEmpty else {
+        guard !overlayContexts.isEmpty else {
             print("Cant Hide, Overlay is nil")
             return
         }
         
-        if overlayScreens.contains(where: \.isVisible) {
+        if overlayContexts.map(\.panel).contains(where: \.isVisible) {
             pendingHide?.cancel()
 
             let workItem = DispatchWorkItem { [weak self] in
                 guard let self = self else { return }
-                self.overlayScreens.forEach { $0.orderOut(nil) }
+                self.overlayContexts.map(\.panel).forEach { $0.orderOut(nil) }
                 self.pendingHide = nil
                 
                 NSCursor.arrow.set()
@@ -259,7 +122,7 @@ final class CaptureAreaCoordinator {
         pendingHide = nil
         isStartingScrollCapture = false
 
-        closeOverlayPanels()
+        closeAndResetOverlayPanels()
         NSCursor.arrow.set()
     }
 
@@ -272,44 +135,199 @@ final class CaptureAreaCoordinator {
 
         NSCursor.crosshair.set()
     }
-
-    private func closeOverlayPanels() {
-        guard !overlayScreens.isEmpty else { return }
-
-        if defaultsManager.captureOverAppleScreenshotUI {
-            appleScreenshotInputBridge.stop()
-        }
-        overlayScreens.forEach {
-            $0.orderOut(nil)
-            $0.close()
-        }
-        overlayScreens = []
-        overlayContexts = []
-    }
-
+    
     private func overlayForMouse() -> NSPanel? {
         guard let screen = ScreenHelpers.screenUnderMouse() else { return nil }
-        return overlayScreens.first { $0.frame == screen.frame }
+        return overlayContexts.map(\.panel).first { $0.frame == screen.frame }
     }
 
     private func captureTarget(for overlayRect: CGRect, on screen: NSScreen) -> (screen: NSScreen, rect: CGRect) {
         return (screen, overlayRect.standardized)
     }
+}
 
-    private func accessibilityTargetPoint(for overlayRect: CGRect, on screen: NSScreen) -> CGPoint {
-        let rect = overlayRect.standardized
-
-        guard let displayID = screen.displayID else {
-            return CGPoint(
-                x: screen.frame.minX + rect.midX,
-                y: screen.frame.minY + rect.midY
-            )
+extension CaptureAreaCoordinator {
+    
+    internal func setupOverlaysForAllScreens() {
+        guard !NSScreen.screens.isEmpty else {
+            print("Cant SetupOverlay, No screens")
+            return
         }
+        
+        closeAndResetOverlayPanels()
+        removeDisconnectedDisplayModels()
+        createOverlayContexts()
+    }
+    
+    private func createOverlayContexts() {
+        overlayContexts = NSScreen.screens.map { screen in
+            makeOverlayContext(for: screen)
+        }
+    }
+    
+    private func removeDisconnectedDisplayModels() {
+        let connectedDisplayIDs = Set(NSScreen.screens.compactMap(\.displayID))
+        models = models.filter { connectedDisplayIDs.contains($0.key) }
+    }
+    
+    private func closeAndResetOverlayPanels() {
+        guard !overlayContexts.isEmpty else { return }
 
-        let displayBounds = CGDisplayBounds(displayID)
-        return CGPoint(
-            x: displayBounds.minX + rect.midX,
-            y: displayBounds.minY + rect.midY
+        if defaultsManager.captureOverAppleScreenshotUI {
+            appleScreenshotInputBridge.stop()
+        }
+        overlayContexts.map(\.panel).forEach {
+            $0.orderOut(nil)
+            $0.close()
+        }
+        overlayContexts = []
+    }
+    
+    private func makeOverlayContext(for screen: NSScreen) -> OverlayContext {
+        // create a NSPanel to cover the screen
+        let overlayScreen = createPanel(for: screen)
+        // create the model that belongs to the view
+        let model = createModel(for: screen)
+        
+        let view: NSView = CursorHostingView(
+            rootView: SelectionOverlay(
+                model: model,
+                defaultsManager: defaultsManager
+            )
+        )
+        
+        // basic config
+        view.wantsLayer = true
+        view.layer?.masksToBounds = false
+        
+        overlayScreen.contentView = view
+        overlayScreen.initialFirstResponder = view
+        
+        return OverlayContext(
+            screen: screen,
+            panel: overlayScreen,
+            model: model
         )
     }
+    
+    private func createModel(for screen: NSScreen) -> CaptureAreaModel {
+        let model = model(for: screen)
+        model.keepSelectionInBoundsIfNeeded(
+            to: CGRect(origin: .zero, size: screen.frame.size)
+        )
+
+        model.capture = { [weak self] rect in
+            guard let self else { return }
+            
+            let scrollCapture = self.isStartingScrollCapture
+            let captureTarget = self.captureTarget(for: rect, on: screen)
+            let targetPoint = accessibilityTargetPoint(
+                for: captureTarget.rect,
+                on: captureTarget.screen
+            )
+            
+            if scrollCapture {
+                self.hideImmediatelyForScrollingCapture()
+            } else {
+                self.hide()
+            }
+            
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                
+                if scrollCapture {
+                    try? await Task.sleep(nanoseconds: 300_000_000)
+                    
+                    let result = await self.scrollingCaptureService.capture(
+                        screen: captureTarget.screen,
+                        rect: captureTarget.rect,
+                        targetPoint: targetPoint
+                    )
+                    
+                    switch result {
+                    case .failure:
+                        break
+                    case .partial(let image, reason: _):
+                        self.onCaptureImage?(image, captureTarget.screen)
+                    case .success(let image):
+                        self.onCaptureImage?(image, captureTarget.screen)
+                    }
+                    
+                    self.onCaptureFinished?()
+                } else {
+                    if let image = await self.screenshot.takeScreenshot(
+                        of: captureTarget.screen,
+                        croppingTo: captureTarget.rect
+                    ) {
+                        self.onCaptureImage?(image, captureTarget.screen)
+                    }
+                    self.onCaptureFinished?()
+                }
+            }
+        }
+        
+        model.onSelectionBegan = { [weak self, weak model] in
+            guard let self, let model else { return }
+            
+            self.overlayContexts
+                .filter { $0.model !== model }
+                .forEach { $0.model.clearSelection() }
+        }
+        
+        model.onExit = { [weak self] in
+            guard let self else { return }
+            self.hide()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) { [weak self] in
+                self?.onCaptureFinished?()
+            }
+        }
+        return model
+    }
+}
+
+/// Create NSPanel
+private func createPanel(for screen: NSScreen) -> NSPanel {
+    let overlayScreen = ActiveAppearancePanel(
+        contentRect: .zero,
+        styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
+        backing: .buffered,
+        defer: false
+    )
+    overlayScreen.setFrame(screen.frame, display: true)
+    /// Allow content to draw outside panel bounds
+    overlayScreen.contentView?.wantsLayer = true
+    
+    overlayScreen.registerForDraggedTypes([.fileURL])
+    overlayScreen.title = ""
+    overlayScreen.acceptsMouseMovedEvents = true
+    
+    overlayScreen.level = NSWindow.Level(rawValue: Int(1600))
+    overlayScreen.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
+    overlayScreen.isFloatingPanel = true
+    overlayScreen.hidesOnDeactivate = false
+    overlayScreen.isMovableByWindowBackground = false
+    overlayScreen.backgroundColor = .clear
+    overlayScreen.isOpaque = false
+    overlayScreen.hasShadow = false
+    return overlayScreen
+}
+
+/// converting a rectangle that exists in the overlay’s local coordinate space
+/// into a global screen point that Accessibility can use
+private func accessibilityTargetPoint(for overlayRect: CGRect, on screen: NSScreen) -> CGPoint {
+    let rect = overlayRect.standardized
+    
+    guard let displayID = screen.displayID else {
+        return CGPoint(
+            x: screen.frame.minX + rect.midX,
+            y: screen.frame.minY + rect.midY
+        )
+    }
+    
+    let displayBounds = CGDisplayBounds(displayID)
+    return CGPoint(
+        x: displayBounds.minX + rect.midX,
+        y: displayBounds.minY + rect.midY
+    )
 }

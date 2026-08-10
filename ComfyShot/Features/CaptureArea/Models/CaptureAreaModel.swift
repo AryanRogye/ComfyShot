@@ -70,7 +70,7 @@ final class CaptureAreaModel {
         dragCurrent = nil
     }
 
-    func constrainSelection(to bounds: CGRect) {
+    public func keepSelectionInBoundsIfNeeded(to bounds: CGRect) {
         guard let selectionRect else { return }
 
         let constrainedRect = selectionRect.standardized.intersection(bounds.standardized)

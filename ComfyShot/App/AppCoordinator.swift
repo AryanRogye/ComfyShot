@@ -60,7 +60,7 @@ class AppCoordinator {
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 if let screenshot = await self.screenshotService.takeScreenshot() {
-                    self.userImageCoordinator.addImage(screenshot, to: screen)
+                    self.userImageCoordinator.add(screenshot, to: screen)
                 }
             }
         }
@@ -94,11 +94,13 @@ class AppCoordinator {
         )
         
         captureAreaCoordinator.onCaptureImage = { [weak self] image, screen in
-            self?.userImageCoordinator.addImage(image, to: screen)
+            guard let self else { return }
+            self.userImageCoordinator.add(image, to: screen)
         }
         
         captureAreaCoordinator.onCaptureFinished = { [weak self] in
-            self?.userImageCoordinator.showAll()
+            guard let self else { return }
+            self.userImageCoordinator.showAll()
         }
         
         hotkeyCoordinator.start(
@@ -106,7 +108,6 @@ class AppCoordinator {
             onCaptureArea: onCaptureArea,
             onScrollingCapture: onScrollingCapture
         )
-
     }
 
     public func stop() {

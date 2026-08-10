@@ -51,7 +51,7 @@ enum CaptureCursorOverride {
     }
 }
 
-final class CrosshairHostingView<Content: View>: NSHostingView<Content> {
+final class CursorHostingView<Content: View>: NSHostingView<Content> {
     private var trackingArea: NSTrackingArea?
     
     private var currentCursor: NSCursor {
