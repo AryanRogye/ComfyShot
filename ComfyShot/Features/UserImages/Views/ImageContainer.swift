@@ -22,6 +22,10 @@ struct ImageContainer: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: spacing) {
+            
+            // when the images overflow, this will never be empty
+            // this is where all the old images will flow into
+            // as new images render in the `UserImageView`
             if !layout.overflowImages.isEmpty {
                 OverflowSection(
                     model: model,

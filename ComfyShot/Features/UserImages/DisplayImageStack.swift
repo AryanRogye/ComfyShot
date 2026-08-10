@@ -30,7 +30,7 @@ final class DisplayImageStack {
     
     /// Hosts the SwiftUI content inside the floating panel.
     /// Kept alive so the root view can be updated without recreating the panel.
-    private var hostingView: NSHostingView<UserImageListView>?
+    private var hostingView: NSHostingView<ImageStackView>?
 
     func addImage(_ userImage: UserImage) {
         model.add(userImage)
@@ -55,7 +55,7 @@ final class DisplayImageStack {
         imageSpacing: CGFloat
     ) {
         let placement = placementForStack(on: screen, padding: padding)
-        let view = UserImageListView(
+        let view = ImageStackView(
             model: model,
             spacing: imageSpacing,
             placement: placement,

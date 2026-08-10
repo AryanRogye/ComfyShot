@@ -1,5 +1,5 @@
 //
-//  UserImageListView.swift
+//  ImageStackView.swift
 //  ComfyShot
 //
 //  Created by Aryan Rogye on 6/30/26.
@@ -17,7 +17,8 @@ enum Metrics {
     static let galleryCollapseDelay = Duration.milliseconds(150)
 }
 
-struct UserImageListView: View {
+/// This is the view that is shown on each NSScreen that has the images on
+struct ImageStackView: View {
     
     @Bindable var model: DisplayImageStackModel
     let spacing: CGFloat
@@ -103,13 +104,22 @@ struct ImageStackOverflowLayout {
     let visibleImages: [UserImage]
     let overflowImages: [UserImage]
 
-    init(images: [UserImage], maxHeight: CGFloat, spacing: CGFloat, trayHeight: CGFloat) {
+    init(
+        images: [UserImage],
+        maxHeight: CGFloat,
+        spacing: CGFloat,
+        trayHeight:
+        CGFloat
+    ) {
         // First check whether the complete stack fits without an overflow tray.
         // There is one spacing gap between each neighboring pair of images.
-        let fullHeight = images.reduce(CGFloat.zero) { $0 + $1.size.height }
-            + spacing * CGFloat(max(images.count - 1, 0))
-
-        guard fullHeight > maxHeight else {
+        if !Self.overflowExists(
+            images: images,
+            spacing: spacing,
+            maxHeight: maxHeight
+        ) {
+            // overflow doesnt exist so we exit early
+            // and set values
             visibleImages = images
             overflowImages = []
             return
@@ -143,5 +153,19 @@ struct ImageStackOverflowLayout {
         // from the split onward is the newest content displayed in the stack.
         visibleImages = Array(images[visibleStartIndex...])
         overflowImages = Array(images[..<visibleStartIndex])
+    }
+    
+    private static func overflowExists(
+        images: [UserImage],
+        spacing: CGFloat,
+        maxHeight: CGFloat
+    ) -> Bool {
+        let fullHeight = images.reduce(CGFloat.zero) { $0 + $1.size.height }
+        + spacing * CGFloat(max(images.count - 1, 0))
+        
+        guard fullHeight > maxHeight else {
+            return false
+        }
+        return true
     }
 }

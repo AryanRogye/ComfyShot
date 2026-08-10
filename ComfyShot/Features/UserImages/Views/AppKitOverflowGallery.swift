@@ -198,7 +198,6 @@ private final class OverflowGalleryItem: NSCollectionViewItem {
             )
             .rotationEffect(.degrees(rotation))
             .offset(y: verticalOffset)
-            .accessibilityLabel("Older screenshot \(position + 1) of \(count)")
         )
     }
 }

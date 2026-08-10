@@ -31,43 +31,36 @@ struct UserImageView: View {
 
     var body: some View {
         ZStack {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(.black.opacity(0.12))
+
             Image(decorative: image, scale: 1)
                 .resizable()
-                .frame(width: size.width, height: size.height)
-                .clipShape(imageShape)
-                .modifier(UserImageShadowModifier(style: shadowStyle))
-                .overlay(alignment: .topLeading) {
-                    if hovering, let dragURL {
-                        Button {
-                            NSWorkspace.shared.open(dragURL)
-                        } label: {
-                            Text("Open")
-                                .fontWeight(.bold)
-                                .foregroundStyle(.black)
-                                .padding(4)
-                                .glassEffect(.regular, in: .rect(cornerRadius: 8))
-                        }
-                        .buttonStyle(.plain)
-                        .padding(8)
-                    }
-                }
-                .overlay(alignment: .topTrailing) {
-                    if hovering {
-                        Button(action: onClose) {
-                            Image(systemName: "xmark")
-                                .fontWeight(.black)
-                                .foregroundStyle(.black)
-                                .padding(4)
-                                .glassEffect(.regular, in: .rect(cornerRadius: 8))
-                        }
-                        .buttonStyle(.plain)
-                        .padding(8)
-                    }
-                }
+                .aspectRatio(contentMode: .fit)
+                .frame(
+                    width: size.width,
+                    height: size.height
+                )
+                .clipShape(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                )
         }
         .frame(
             width: size.width,
             height: size.height
+        )
+        .clipShape(
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        )
+        .modifier(
+            UserImageShadowModifier(style: shadowStyle)
+        )
+        .modifier(
+            UserImageControlsModifier(
+                hovering: hovering,
+                dragURL: dragURL,
+                onClose: onClose
+            )
         )
         .onHover { hovering in
             withAnimation(.smooth) {
@@ -79,13 +72,49 @@ struct UserImageView: View {
         }
         .draggable(dragURL ?? URL(fileURLWithPath: "/dev/null"))
     }
-    
-    private var imageShape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-    }
-
 }
 
+// MARK: - Controls Modifier
+private struct UserImageControlsModifier: ViewModifier {
+    
+    let hovering: Bool
+    let dragURL: URL?
+    let onClose: () -> Void
+    
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .topLeading) {
+                if hovering, let dragURL {
+                    Button {
+                        NSWorkspace.shared.open(dragURL)
+                    } label: {
+                        Text("Open")
+                            .fontWeight(.bold)
+                            .foregroundStyle(.black)
+                            .padding(4)
+                            .glassEffect(.regular, in: .rect(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(8)
+                }
+            }
+            .overlay(alignment: .topTrailing) {
+                if hovering {
+                    Button(action: onClose) {
+                        Image(systemName: "xmark")
+                            .fontWeight(.black)
+                            .foregroundStyle(.black)
+                            .padding(4)
+                            .glassEffect(.regular, in: .rect(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(8)
+                }
+            }
+    }
+}
+
+// MARK: - Shadow Modifier
 private struct UserImageShadowModifier: ViewModifier {
     let style: UserImageView.ShadowStyle
 
