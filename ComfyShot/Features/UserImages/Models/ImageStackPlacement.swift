@@ -11,4 +11,5 @@ struct ImageStackPlacement {
     let leadingInset: CGFloat
     let bottomInset: CGFloat
     let maxHeight: CGFloat
+    let maxWidth: CGFloat
 }

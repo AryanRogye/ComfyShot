@@ -33,7 +33,7 @@ final class DisplayImageStack {
     private var hostingView: NSHostingView<UserImageListView>?
 
     func addImage(_ userImage: UserImage) {
-        model.images.append(userImage)
+        model.add(userImage)
     }
     
     public func hide() {
@@ -127,7 +127,8 @@ final class DisplayImageStack {
         return ImageStackPlacement(
             leadingInset: visibleFrame.minX - screenFrame.minX + padding.leadingPadding,
             bottomInset: visibleFrame.minY - screenFrame.minY + padding.bottomPadding,
-            maxHeight: max(1, visibleFrame.height - padding.topPadding * 2)
+            maxHeight: max(1, visibleFrame.height - padding.topPadding - padding.bottomPadding),
+            maxWidth: max(1, visibleFrame.width - padding.leadingPadding - padding.trailingPadding)
         )
     }
 

@@ -12,13 +12,18 @@ import UniformTypeIdentifiers
 
 struct UserImageView: View {
 
-    @Environment(\.self) var environment
-    
+    enum ShadowStyle {
+        case regular
+        case compact
+    }
+
     static let shadowOutset: CGFloat = 32
     private let cornerRadius: CGFloat = 16
 
+    let id: UUID
     let image: CGImage
     let size: NSSize
+    var shadowStyle: ShadowStyle = .regular
     let onClose: () -> Void
 
     @State private var hovering: Bool = false
@@ -30,24 +35,7 @@ struct UserImageView: View {
                 .resizable()
                 .frame(width: size.width, height: size.height)
                 .clipShape(imageShape)
-                .shadow(
-                    color: .black.opacity(0.25),
-                    radius: 3,
-                    x: 0,
-                    y: 2
-                )
-                .shadow(
-                    color: .black.opacity(0.48),
-                    radius: 12.5,
-                    x: 0,
-                    y: 5
-                )
-                .shadow(
-                    color: .black.opacity(0.28),
-                    radius: 22,
-                    x: 0,
-                    y: 10
-                )
+                .modifier(UserImageShadowModifier(style: shadowStyle))
                 .overlay(alignment: .topLeading) {
                     if hovering, let dragURL {
                         Button {
@@ -86,14 +74,48 @@ struct UserImageView: View {
                 self.hovering = hovering
             }
         }
-        .onAppear {
-            dragURL = try? writePNGTempFile(from: image)
+        .task(id: id) {
+            dragURL = await UserImageExportStore.shared.dragURL(for: id, image: image)
         }
         .draggable(dragURL ?? URL(fileURLWithPath: "/dev/null"))
     }
     
     private var imageShape: RoundedRectangle {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+    }
+
+}
+
+private struct UserImageShadowModifier: ViewModifier {
+    let style: UserImageView.ShadowStyle
+
+    func body(content: Content) -> some View {
+        switch style {
+        case .regular:
+            content
+                .shadow(color: .black.opacity(0.25), radius: 3, x: 0, y: 2)
+                .shadow(color: .black.opacity(0.48), radius: 12.5, x: 0, y: 5)
+                .shadow(color: .black.opacity(0.28), radius: 22, x: 0, y: 10)
+        case .compact:
+            content
+                .shadow(color: .black.opacity(0.34), radius: 6, x: 0, y: 3)
+        }
+    }
+}
+
+private actor UserImageExportStore {
+    static let shared = UserImageExportStore()
+
+    private var urlsByImageID: [UUID: URL] = [:]
+
+    func dragURL(for id: UUID, image: CGImage) -> URL? {
+        if let URL = urlsByImageID[id] {
+            return URL
+        }
+
+        let URL = try? writePNGTempFile(from: image)
+        urlsByImageID[id] = URL
+        return URL
     }
 
     private func writePNGTempFile(from cgImage: CGImage) throws -> URL {
