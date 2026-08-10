@@ -16,16 +16,9 @@ final class UserImageCoordinator {
     
     private var screenParametersObserver: NSObjectProtocol?
     
-    private let padding: ImageStackPadding = .init(
-        leadingPadding: 20,
-        trailingPadding: 12,
-        topPadding: 12,
-        bottomPadding: 12
-    )
     private let imageSpacing: CGFloat = 12
-    private let maxImageWidth: CGFloat = 300
-    private let maxImageHeight: CGFloat = 360
     
+
     init() {
         screenParametersObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
@@ -52,13 +45,16 @@ final class UserImageCoordinator {
     public func add(_ image: CGImage, to screen: NSScreen) {
         guard let display = DisplayIdentity(screen: screen) else { return }
         
-        let size = sizeForImage(image, on: screen)
+        // Use the minimum presentation container for unusually narrow images.
+        // UserImageView aspect-fits the pixels inside this size, so the image is
+        // never stretched while its hover target and controls remain usable.
+        let size = UserImageSizing.containerSizeForImage(image, on: screen)
         let stack = stackForDisplay(display)
         let userImage = UserImage(image: image, size: size)
         stack.addImage(userImage)
         stack.present(
             on: screen,
-            padding: padding,
+            padding: UserImageSizing.padding,
             imageSpacing: imageSpacing
         )
         
@@ -85,20 +81,6 @@ final class UserImageCoordinator {
         stacksByDisplay.values.forEach { $0.show() }
     }
 
-    /// Picks a display size from the raw CGImage dimensions, preserving aspect
-    /// ratio while keeping tall captures from dominating the screen.
-    private func sizeForImage(_ image: CGImage, on screen: NSScreen) -> NSSize {
-        let imageWidth = CGFloat(image.width)
-        let imageHeight = CGFloat(image.height)
-        let availableHeight = max(1, screen.visibleFrame.height - padding.topPadding * 2)
-        let heightLimit = min(maxImageHeight, availableHeight * 0.45)
-        let scale = min(1, maxImageWidth / imageWidth, heightLimit / imageHeight)
-        
-        return NSSize(
-            width: max(1, imageWidth * scale),
-            height: max(1, imageHeight * scale)
-        )
-    }
     
     /// Function retreives a stack for a `DisplayIdentity` if doesnt exist,
     /// we create it and return the newly created stack
@@ -129,7 +111,7 @@ final class UserImageCoordinator {
             // if stack for display is not empty, we just replace it quickly
             stack.present(
                 on: screen,
-                padding: padding,
+                padding: UserImageSizing.padding,
                 imageSpacing: imageSpacing
             )
             
@@ -142,5 +124,49 @@ final class UserImageCoordinator {
         for (display, stack) in stacksByDisplay where !activeDisplays.contains(display) {
             stack.closePanel()
         }
+    }
+}
+
+enum UserImageSizing {
+    
+    public static let padding: ImageStackPadding = .init(
+        leadingPadding: 20,
+        trailingPadding: 12,
+        topPadding: 12,
+        bottomPadding: 12
+    )
+    
+    // Max: 300x360
+    private static let maxImageWidth: CGFloat = 300
+    private static let maxImageHeight: CGFloat = 360
+    
+    // min: 100x120
+    private static let minImageWidth: CGFloat = 100
+    private static let minImageHeight: CGFloat = 120
+    
+    
+    public static func sizeForImage(_ image: CGImage, on screen: NSScreen) -> NSSize {
+        let imageWidth = CGFloat(image.width)
+        let imageHeight = CGFloat(image.height)
+        let availableHeight = max(1, screen.visibleFrame.height - padding.topPadding * 2)
+        let heightLimit = min(maxImageHeight, availableHeight * 0.45)
+        
+        // Image only ever scales DOWN to fit the max box — never stretched up.
+        let scale = min(1, maxImageWidth / imageWidth, heightLimit / imageHeight)
+        
+        return NSSize(
+            width: max(1, imageWidth * scale),
+            height: max(1, imageHeight * scale)
+        )
+    }
+    
+    /// Container size: the box the image sits in, which enforces the mins.
+    /// The image gets centered inside this — it does NOT get scaled to fill it.
+    public static func containerSizeForImage(_ image: CGImage, on screen: NSScreen) -> NSSize {
+        let imageSize = sizeForImage(image, on: screen)
+        return NSSize(
+            width: max(minImageWidth, imageSize.width),
+            height: max(minImageHeight, imageSize.height)
+        )
     }
 }

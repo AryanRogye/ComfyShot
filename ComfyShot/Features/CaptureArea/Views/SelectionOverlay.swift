@@ -131,7 +131,6 @@ struct SelectionOverlay: View {
             }
             .buttonStyle(.plain)
             .keyboardShortcut(.defaultAction)
-            .accessibilityLabel("Take A Capture Of The Selected Area")
 
             Button(action: model.exit) {
                 Image(systemName: "xmark")
@@ -144,7 +143,6 @@ struct SelectionOverlay: View {
             }
             .buttonStyle(.plain)
             .keyboardShortcut(.cancelAction)
-            .accessibilityLabel("Close Selection Overlay")
         }
         .padding()
     }
