@@ -22,6 +22,9 @@ final class CaptureAreaCoordinator {
     private lazy var scrollingCaptureService = ScrollingCaptureService(
         screenshot: screenshot
     )
+    private let scrollingCaptureEscapeMonitor = ScrollingCaptureEscapeMonitor()
+    private var scrollingCaptureTask: Task<Void, Never>?
+    private var scrollingCaptureID: UUID?
     
     private var overlayContexts: [OverlayContext] = []
     private var models: [CGDirectDisplayID: CaptureAreaModel] = [:]
@@ -232,29 +235,15 @@ extension CaptureAreaCoordinator {
                 self.hide()
             }
             
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                
-                if scrollCapture {
-                    try? await Task.sleep(nanoseconds: 300_000_000)
-                    
-                    let result = await self.scrollingCaptureService.capture(
-                        screen: captureTarget.screen,
-                        rect: captureTarget.rect,
-                        targetPoint: targetPoint
-                    )
-                    
-                    switch result {
-                    case .failure:
-                        break
-                    case .partial(let image, reason: _):
-                        self.onCaptureImage?(image, captureTarget.screen)
-                    case .success(let image):
-                        self.onCaptureImage?(image, captureTarget.screen)
-                    }
-                    
-                    self.onCaptureFinished?()
-                } else {
+            if scrollCapture {
+                self.startScrollingCapture(
+                    screen: captureTarget.screen,
+                    rect: captureTarget.rect,
+                    targetPoint: targetPoint
+                )
+            } else {
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
                     if let image = await self.screenshot.takeScreenshot(
                         of: captureTarget.screen,
                         croppingTo: captureTarget.rect
@@ -283,6 +272,57 @@ extension CaptureAreaCoordinator {
             }
         }
         return model
+    }
+
+    private func startScrollingCapture(
+        screen: NSScreen,
+        rect: CGRect,
+        targetPoint: CGPoint
+    ) {
+        scrollingCaptureTask?.cancel()
+
+        let captureID = UUID()
+        scrollingCaptureID = captureID
+
+        scrollingCaptureTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer {
+                self.finishScrollingCapture(id: captureID)
+            }
+
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            guard !Task.isCancelled else { return }
+
+            let result = await self.scrollingCaptureService.capture(
+                screen: screen,
+                rect: rect,
+                targetPoint: targetPoint
+            )
+
+            guard self.scrollingCaptureID == captureID else { return }
+            switch result {
+            case .failure:
+                break
+            case .partial(let image, reason: _), .success(let image):
+                self.onCaptureImage?(image, screen)
+            }
+        }
+
+        let monitorStarted = scrollingCaptureEscapeMonitor.start { [weak self] in
+            self?.scrollingCaptureTask?.cancel()
+        }
+        if !monitorStarted {
+            print("Scrolling capture Escape monitor could not start. Accessibility/Input Monitoring permission may be required.")
+        }
+    }
+
+    private func finishScrollingCapture(id: UUID) {
+        guard scrollingCaptureID == id else { return }
+
+        scrollingCaptureEscapeMonitor.stop()
+        scrollingCaptureTask = nil
+        scrollingCaptureID = nil
+        onCaptureFinished?()
     }
 }
 
@@ -330,4 +370,91 @@ private func accessibilityTargetPoint(for overlayRect: CGRect, on screen: NSScre
         x: displayBounds.minX + rect.midX,
         y: displayBounds.minY + rect.midY
     )
+}
+
+/// Listens for Escape while scrolling capture runs in another application.
+/// The event tap consumes Escape so it does not also dismiss or modify the
+/// application being captured.
+@MainActor
+private final class ScrollingCaptureEscapeMonitor {
+    private var eventTap: CFMachPort?
+    private var runLoopSource: CFRunLoopSource?
+    private var onEscape: (() -> Void)?
+
+    @discardableResult
+    func start(onEscape: @escaping () -> Void) -> Bool {
+        stop()
+        self.onEscape = onEscape
+
+        let keyDownMask = CGEventMask(1) << CGEventMask(CGEventType.keyDown.rawValue)
+        let userInfo = Unmanaged.passUnretained(self).toOpaque()
+
+        guard let eventTap = CGEvent.tapCreate(
+            tap: .cghidEventTap,
+            place: .headInsertEventTap,
+            options: .defaultTap,
+            eventsOfInterest: keyDownMask,
+            callback: Self.handleEvent,
+            userInfo: userInfo
+        ), let runLoopSource = CFMachPortCreateRunLoopSource(
+            kCFAllocatorDefault,
+            eventTap,
+            0
+        ) else {
+            self.onEscape = nil
+            return false
+        }
+
+        self.eventTap = eventTap
+        self.runLoopSource = runLoopSource
+        CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
+        CGEvent.tapEnable(tap: eventTap, enable: true)
+        return true
+    }
+
+    func stop() {
+        if let eventTap {
+            CGEvent.tapEnable(tap: eventTap, enable: false)
+        }
+
+        if let runLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
+        }
+
+        eventTap = nil
+        runLoopSource = nil
+        onEscape = nil
+    }
+
+    private func receivedEscape() {
+        onEscape?()
+    }
+
+    private static let handleEvent: CGEventTapCallBack = { _, type, event, userInfo in
+        guard let userInfo else {
+            return Unmanaged.passUnretained(event)
+        }
+
+        let monitor = Unmanaged<ScrollingCaptureEscapeMonitor>
+            .fromOpaque(userInfo)
+            .takeUnretainedValue()
+
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            if let eventTap = monitor.eventTap {
+                CGEvent.tapEnable(tap: eventTap, enable: true)
+            }
+            return Unmanaged.passUnretained(event)
+        }
+
+        guard type == .keyDown,
+              event.getIntegerValueField(.keyboardEventKeycode) == 53
+        else {
+            return Unmanaged.passUnretained(event)
+        }
+
+        DispatchQueue.main.async {
+            monitor.receivedEscape()
+        }
+        return nil
+    }
 }

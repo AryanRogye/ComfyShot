@@ -119,6 +119,10 @@ public final class ScrollingCaptureService {
                 canSetScrollValue: canSetScrollValue,
                 configuration: configuration
             ) else {
+                if Task.isCancelled {
+                    stopReason = .cancelled
+                    break
+                }
                 return .failure(.scrollPositionUnavailable)
             }
 
@@ -128,7 +132,16 @@ public final class ScrollingCaptureService {
                 break
             }
 
+            guard !Task.isCancelled else {
+                stopReason = .cancelled
+                break
+            }
+
             guard let image = await captureFrame(screen: screen, rect: rect) else {
+                if Task.isCancelled {
+                    stopReason = .cancelled
+                    break
+                }
                 return .failure(.captureFailed)
             }
 
@@ -300,7 +313,7 @@ private extension ScrollingCaptureService {
                 targetPoint: targetPoint,
                 configuration: configuration
             ) else {
-                stopReason = .reachedEnd
+                stopReason = Task.isCancelled ? .cancelled : .reachedEnd
                 break
             }
 
@@ -328,8 +341,11 @@ private extension ScrollingCaptureService {
         configuration: ScrollingCaptureConfiguration
     ) async -> CGImage? {
         for tap in [CGEventTapLocation.cgSessionEventTap, CGEventTapLocation.cghidEventTap] {
+            guard !Task.isCancelled else { return nil }
             postScrollEvent(.forward, at: targetPoint, configuration: configuration, tap: tap)
             try? await Task.sleep(nanoseconds: configuration.settleDelayNanoseconds)
+
+            guard !Task.isCancelled else { return nil }
 
             guard let nextFrame = await captureFrame(screen: screen, rect: rect),
                   ScrollingCaptureStitcher.imageDifferenceScore(previousFrame, nextFrame) > 2.0
@@ -370,6 +386,7 @@ private extension ScrollingCaptureService {
 
         let maxAttempts = max(1, configuration.maxActionAttemptsPerFrame * 4)
         for _ in 0..<maxAttempts {
+            guard !Task.isCancelled else { return nil }
             let previousValue = metrics.value
             guard performScrollAction(.backward, target: target) else {
                 break
@@ -469,6 +486,7 @@ private extension ScrollingCaptureService {
         let maxAttempts = max(1, configuration.maxActionAttemptsPerFrame)
 
         for _ in 0..<maxAttempts {
+            guard !Task.isCancelled else { return nil }
             guard actualOffsetPoints < requestedOffsetPoints - layout.minimumMovementPoints,
                   metrics.value < metrics.maxValue - layout.valueEpsilon
             else {
@@ -512,6 +530,7 @@ private extension ScrollingCaptureService {
 
         let maxAttempts = max(1, configuration.maxEventAttemptsPerFrame * 8)
         for _ in 0..<maxAttempts {
+            guard !Task.isCancelled else { return nil }
             let previousValue = metrics.value
             guard let nextMetrics = await scrollWithEventAndReadMetrics(
                 .backward,
@@ -557,6 +576,7 @@ private extension ScrollingCaptureService {
         let maxAttempts = max(1, configuration.maxEventAttemptsPerFrame)
 
         for _ in 0..<maxAttempts {
+            guard !Task.isCancelled else { return nil }
             guard actualOffsetPoints < requestedOffsetPoints - layout.minimumMovementPoints,
                   metrics.value < metrics.maxValue - layout.valueEpsilon
             else {
@@ -598,8 +618,11 @@ private extension ScrollingCaptureService {
         guard let scrollbar = target.scrollbar else { return nil }
 
         for tap in [CGEventTapLocation.cgSessionEventTap, CGEventTapLocation.cghidEventTap] {
+            guard !Task.isCancelled else { return nil }
             postScrollEvent(direction, at: targetPoint, configuration: configuration, tap: tap)
             try? await Task.sleep(nanoseconds: configuration.actionStepDelayNanoseconds)
+
+            guard !Task.isCancelled else { return nil }
 
             guard let metrics = scrollMetrics(for: scrollbar) else {
                 return nil

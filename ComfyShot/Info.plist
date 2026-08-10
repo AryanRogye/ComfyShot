@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Sparkle Related -->
+    <key>SUEnableInstallerLauncherService</key>
+    <true/>
+    
+    <key>SUEnableDownloaderService</key>
+    <true/>
+    
+    <key>SUFeedURL</key>
+    <!--    This is what its looking for updates in github-->
+    <string>https://aryanrogye.github.io/ComfyShot/updates/appcast.xml</string>
+
+    <key>SUPublicEDKey</key>
+    <string>taI+LYHIWwzdMURizdr5HG9kfibtBtqxnman2PKkZSU=</string>
+</dict>
+</plist>

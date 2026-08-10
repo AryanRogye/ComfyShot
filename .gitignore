@@ -40,3 +40,6 @@ fastlane/test_output/
 .env
 .env.*
 !.env.example
+*.app
+*.dmg
+updates/create_dmg.sh

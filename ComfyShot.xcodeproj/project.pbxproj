@@ -59,6 +59,10 @@
 		9B4B7070302A7C92008101B9 /* CaptureInputInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B7039302A7C92008101B9 /* CaptureInputInterceptor.swift */; };
 		9B4B7071302A7C92008101B9 /* CursorHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B703A302A7C92008101B9 /* CursorHostingView.swift */; };
 		9B4B7072302A7C92008101B9 /* ScreenHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B703B302A7C92008101B9 /* ScreenHelpers.swift */; };
+		9B965CE5302A8544003000F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 9B965CE4302A8544003000F0 /* Sparkle */; };
+		9B965D42302A87A0003000F0 /* UpdaterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */; };
+		9B965D44302A87AD003000F0 /* UpdateUserDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */; };
+		9B965D46302A87B6003000F0 /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D45302A87B6003000F0 /* UpdateController.swift */; };
 		9BD9DA392FF463950057344F /* SnapCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DA382FF463950057344F /* SnapCore */; };
 		9BD9DA6D2FF46E210057344F /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DA6C2FF46E210057344F /* KeyboardShortcuts */; };
 		9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DAC12FF4E8FC0057344F /* Defaults */; };
@@ -118,6 +122,10 @@
 		9B4B703A302A7C92008101B9 /* CursorHostingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorHostingView.swift; sourceTree = "<group>"; };
 		9B4B703B302A7C92008101B9 /* ScreenHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenHelpers.swift; sourceTree = "<group>"; };
 		9B4B703D302A7C92008101B9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9B965CE6302A85EA003000F0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
+		9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateUserDriver.swift; sourceTree = "<group>"; };
+		9B965D45302A87B6003000F0 /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +133,7 @@
 			isa = PBXFrameworksBuildPhase;
 			files = (
 				9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */,
+				9B965CE5302A8544003000F0 /* Sparkle in Frameworks */,
 				9BD9DA392FF463950057344F /* SnapCore in Frameworks */,
 				9BD9DA6D2FF46E210057344F /* KeyboardShortcuts in Frameworks */,
 			);
@@ -315,6 +324,7 @@
 				9B4B7024302A7C92008101B9 /* Persistance */,
 				9B4B7027302A7C92008101B9 /* Settings */,
 				9B4B7036302A7C92008101B9 /* UserImages */,
+				9B965D40302A879B003000F0 /* Updates */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -333,6 +343,7 @@
 		9B4B703E302A7C92008101B9 /* ComfyShot */ = {
 			isa = PBXGroup;
 			children = (
+				9B965CE6302A85EA003000F0 /* Info.plist */,
 				9B4B6FFC302A7C92008101B9 /* App */,
 				9B4B7002302A7C92008101B9 /* Coordinators */,
 				9B4B700C302A7C92008101B9 /* Extensions */,
@@ -341,6 +352,16 @@
 				9B4B703D302A7C92008101B9 /* Assets.xcassets */,
 			);
 			path = ComfyShot;
+			sourceTree = "<group>";
+		};
+		9B965D40302A879B003000F0 /* Updates */ = {
+			isa = PBXGroup;
+			children = (
+				9B965D45302A87B6003000F0 /* UpdateController.swift */,
+				9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */,
+				9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */,
+			);
+			path = Updates;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -361,6 +382,7 @@
 				9BD9DA382FF463950057344F /* SnapCore */,
 				9BD9DA6C2FF46E210057344F /* KeyboardShortcuts */,
 				9BD9DAC12FF4E8FC0057344F /* Defaults */,
+				9B965CE4302A8544003000F0 /* Sparkle */,
 			);
 			productName = MyApp;
 			productReference = 000000000000000000000120 /* ComfyShot.app */;
@@ -394,6 +416,7 @@
 				9BD9DA372FF463950057344F /* XCLocalSwiftPackageReference "../SnapCore" */,
 				9BD9DA6B2FF46E210057344F /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 				9BD9DAC02FF4E8FC0057344F /* XCRemoteSwiftPackageReference "Defaults" */,
+				9B965CE3302A8544003000F0 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 000000000000000000000020 /* Products */;
@@ -424,6 +447,7 @@
 				9B4B7043302A7C92008101B9 /* HotKeyCoordinator.swift in Sources */,
 				9B4B7044302A7C92008101B9 /* MenuBarCoordinator.swift in Sources */,
 				9B4B7045302A7C92008101B9 /* PermissionCoordinator.swift in Sources */,
+				9B965D42302A87A0003000F0 /* UpdaterViewModel.swift in Sources */,
 				9B4B7046302A7C92008101B9 /* SettingsCoordinator.swift in Sources */,
 				9B4B7047302A7C92008101B9 /* WindowCoordinator.swift in Sources */,
 				9B4B7048302A7C92008101B9 /* Bundle.swift in Sources */,
@@ -442,12 +466,14 @@
 				9B4B7055302A7C92008101B9 /* ScrollingCaptureModels.swift in Sources */,
 				9B4B7056302A7C92008101B9 /* AXUIElement+ScrollingCapture.swift in Sources */,
 				9B4B7057302A7C92008101B9 /* ScrollingCaptureDiscoverer.swift in Sources */,
+				9B965D44302A87AD003000F0 /* UpdateUserDriver.swift in Sources */,
 				9B4B7058302A7C92008101B9 /* ScrollingCaptureService.swift in Sources */,
 				9B4B7059302A7C92008101B9 /* ScrollingCaptureStitcher.swift in Sources */,
 				9B4B705A302A7C92008101B9 /* SelectionOverlay.swift in Sources */,
 				9B4B705B302A7C92008101B9 /* SelectionRect.swift in Sources */,
 				9B4B705C302A7C92008101B9 /* AppleScreenshotInputBridge.swift in Sources */,
 				9B4B705D302A7C92008101B9 /* CaptureAreaCoordinator.swift in Sources */,
+				9B965D46302A87B6003000F0 /* UpdateController.swift in Sources */,
 				9B4B705E302A7C92008101B9 /* PermissionService.swift in Sources */,
 				9B4B705F302A7C92008101B9 /* PermissionView.swift in Sources */,
 				9B4B7060302A7C92008101B9 /* DefaultKeys.swift in Sources */,
@@ -610,12 +636,21 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = B9P888266K;
 				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ComfyShot/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -628,11 +663,18 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MARKETING_VERSION = 1.0;
+				MACOSX_DEPLOYMENT_TARGET = 26;
+				MARKETING_VERSION = 0.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "devplaceholder.$(PROJECT_UNIQUE_VALUE:identifier).$(PRODUCT_NAME:identifier)";
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = com.aryanrogye.ComfyShot;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -649,12 +691,21 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = B9P888266K;
 				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ComfyShot/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -667,11 +718,18 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MARKETING_VERSION = 1.0;
+				MACOSX_DEPLOYMENT_TARGET = 26;
+				MARKETING_VERSION = 0.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "devplaceholder.$(PROJECT_UNIQUE_VALUE:identifier).$(PRODUCT_NAME:identifier)";
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = com.aryanrogye.ComfyShot;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -713,6 +771,14 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		9B965CE3302A8544003000F0 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.9.4;
+			};
+		};
 		9BD9DA6B2FF46E210057344F /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
@@ -732,6 +798,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9B965CE4302A8544003000F0 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9B965CE3302A8544003000F0 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
 		9BD9DA382FF463950057344F /* SnapCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SnapCore;

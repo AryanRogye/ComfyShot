@@ -11,8 +11,14 @@ import KeyboardShortcuts
 @MainActor
 final class MenuBarCoordinator: NSObject {
     
+    private var updaterVM: UpdaterViewModel?
+    private var updateController: UpdateController?
+    
     private var statusItem: NSStatusItem?
     private var menu: NSMenu?
+    
+    private var checkForUpdatesMenuItem: NSMenuItem?
+    private var updateStatusMenuItem: NSMenuItem?
     
     var onCaptureScreen: (() -> Void)?
     var onCaptureArea: (() -> Void)?
@@ -20,17 +26,22 @@ final class MenuBarCoordinator: NSObject {
     var onScrollingCapture: (() -> Void)?
     
     public func start(
+        updaterVM: UpdaterViewModel,
+        updateController: UpdateController,
         onCaptureScreen: @escaping () -> Void,
         onCaptureArea: @escaping () -> Void,
         onOpenSettings: @escaping () -> Void,
         onScrollingCapture: @escaping () -> Void
     ) {
+        self.updaterVM = updaterVM
+        self.updateController = updateController
         self.onCaptureArea = onCaptureArea
         self.onCaptureScreen = onCaptureScreen
         self.onOpenSettings = onOpenSettings
         self.onScrollingCapture = onScrollingCapture
         configureStatusItem()
         configureMenu()
+        observeUpdates()
     }
     
     public func stop() {
@@ -70,9 +81,24 @@ final class MenuBarCoordinator: NSObject {
     @objc private func captureArea(_ sender: NSMenuItem) {
         onCaptureArea?()
     }
+    
+    @objc private func checkForUpdates(_ sender: NSMenuItem) {
+        updateController?.checkForUpdates()
+    }
 }
 
 extension MenuBarCoordinator {
+    
+    private func refreshUpdateMenuItems() {
+        guard let updaterVM else { return }
+        
+        checkForUpdatesMenuItem?.title = updaterVM.checkForUpdatesTitle
+        
+        updateStatusMenuItem?.title =
+        updaterVM.updateStatusLine
+        ?? "Version \(Bundle.main.versionNumber)"
+    }
+    
     private func configureStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         
@@ -96,8 +122,11 @@ extension MenuBarCoordinator {
     }
     
     private func configureMenu() {
+        guard let updaterVM else { return }
         let menu = NSMenu()
         menu.autoenablesItems = false
+        
+        menu.addItem(.sectionHeader(title: "Capture"))
         
         menu.addItem(makeMenuItem(
             title: "Capture Screen",
@@ -119,6 +148,27 @@ extension MenuBarCoordinator {
             shortcut: KeyboardShortcuts.Name.scrollingCapture.shortcut,
             action: #selector(scrollingCapture(_:))
         ))
+        
+        menu.addItem(.separator())
+        
+        menu.addItem(.sectionHeader(title: "Updates"))
+        
+        let checkForUpdatesItem = makeMenuItem(
+            title: updaterVM.checkForUpdatesTitle,
+            systemImageName: "arrow.2.circlepath.circle.fill",
+            action: #selector(checkForUpdates(_:))
+        )
+        
+        let updateStatusItem = makeTextMenuItem(
+            title: updaterVM.updateStatusLine
+            ?? "Version \(Bundle.main.versionNumber)"
+        )
+        
+        checkForUpdatesMenuItem = checkForUpdatesItem
+        updateStatusMenuItem = updateStatusItem
+        
+        menu.addItem(checkForUpdatesItem)
+        menu.addItem(updateStatusItem)
         
         menu.addItem(.separator())
         
@@ -160,5 +210,108 @@ extension MenuBarCoordinator {
         }
         
         return item
+    }
+    
+    private func makeTextMenuItem(
+        title: String,
+        systemImageName: String? = nil
+    ) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+        item.isEnabled = false
+        
+        if let systemImageName {
+            item.image = NSImage(
+                systemSymbolName: systemImageName,
+                accessibilityDescription: title
+            )
+            item.image?.isTemplate = true
+        }
+        
+        return item
+    }
+}
+
+extension MenuBarCoordinator {
+    private func observeUpdates() {
+        observeAppcastAndUpdaterState()
+        observeShowUpdateError()
+        observeUpdateNotFoundError()
+        observeShowPermissionAlert()
+        observeMenuUpdateState()
+    }
+    
+    private func observeMenuUpdateState() {
+        guard let updaterVM else { return }
+        
+        withObservationTracking {
+            _ = updaterVM.checkForUpdatesTitle
+            _ = updaterVM.updateStatusLine
+        } onChange: { [weak self] in
+            guard let self else { return }
+            
+            DispatchQueue.main.async {
+                self.refreshUpdateMenuItems()
+                self.observeMenuUpdateState()
+            }
+        }
+    }
+    
+    private func observeAppcastAndUpdaterState() {
+        guard let updaterVM else { return }
+        withObservationTracking {
+            _ = updaterVM.appcast;
+            _ = updaterVM.updateState
+        } onChange: { [weak self] in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                if updaterVM.appcast != nil && updaterVM.updateState != nil {
+                    self.updaterVM?.presentUpdateFoundAlert()
+                }
+                self.refreshUpdateMenuItems()
+                self.observeAppcastAndUpdaterState()
+            }
+        }
+    }
+    
+    private func observeShowUpdateError() {
+        guard let updaterVM else { return }
+        withObservationTracking {
+            _ = updaterVM.showUpdateError
+        } onChange: { [weak self] in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                self.updaterVM?.presentUpdateErrorAlert()
+                self.refreshUpdateMenuItems()
+                self.observeShowUpdateError()
+            }
+        }
+    }
+    
+    private func observeUpdateNotFoundError() {
+        guard let updaterVM else { return }
+        withObservationTracking {
+            _ = updaterVM.showUpdateNotFoundError
+        } onChange: { [weak self] in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                self.updaterVM?.presentNoUpdateAlert()
+                self.refreshUpdateMenuItems()
+                self.observeUpdateNotFoundError()
+            }
+        }
+    }
+    
+    private func observeShowPermissionAlert() {
+        guard let updaterVM else { return }
+        withObservationTracking {
+            _ = updaterVM.showPermissionAlert
+        } onChange: { [weak self] in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                self.updaterVM?.presentPermissionAlert()
+                self.refreshUpdateMenuItems()
+                self.observeShowPermissionAlert()
+            }
+        }
     }
 }

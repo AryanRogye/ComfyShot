@@ -14,6 +14,7 @@ class AppCoordinator {
     private lazy var windowCoordinator = WindowCoordinator()
     
     private let permissionService = PermissionService()
+    private let updateController = UpdateController()
 
     private let defaultsManager = DefaultsManager()
     private let menuBarCoordinator = MenuBarCoordinator()
@@ -87,6 +88,8 @@ class AppCoordinator {
         
         
         menuBarCoordinator.start(
+            updaterVM: updateController.updaterVM,
+            updateController: updateController,
             onCaptureScreen: onCaptureScreen,
             onCaptureArea: onCaptureArea,
             onOpenSettings: onOpenSettings,
