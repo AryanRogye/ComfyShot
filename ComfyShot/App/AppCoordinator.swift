@@ -41,6 +41,37 @@ class AppCoordinator {
     )
     
     init() {
+        // check for another copy of ComfyShot
+        let apps = NSWorkspace.shared.runningApplications
+        let pid: pid_t = ProcessInfo.processInfo.processIdentifier
+        
+        // finds apps that
+        if apps.contains(where: { $0.bundleIdentifier == Bundle.main.bundleIdentifier && pid != $0.processIdentifier }) {
+            let alert = AlertMaker.makeAlert(
+                messageText: "Another ComfyShot Is Running",
+                informativeText: "Another copy of ComfyShot is already running. Running multiple copies may cause unexpected behavior.",
+                style: .informational,
+                buttons: ["Quit", "Terminate Other App", "I Dont Care"])
+            switch alert.runModal() {
+            case .alertFirstButtonReturn:
+                NSApp.terminate(nil)
+            case .alertSecondButtonReturn:
+                
+                for app in apps where app.bundleIdentifier == Bundle.main.bundleIdentifier && app.processIdentifier != pid {
+                    app.terminate()
+                }
+                checkPermissionsThenStart()
+            case .alertThirdButtonReturn:
+                checkPermissionsThenStart()
+            default:
+                checkPermissionsThenStart()
+            }
+        } else {
+            checkPermissionsThenStart()
+        }
+    }
+    
+    private func checkPermissionsThenStart() {
         if !permissionService.isAccessibilityEnabled || !permissionService.isScreenRecordingEnabled {
             permissionCoordinator.open()
         } else {

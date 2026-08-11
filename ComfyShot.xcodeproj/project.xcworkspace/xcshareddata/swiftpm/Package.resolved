@@ -1,5 +1,5 @@
 {
-  "originHash" : "9e012cd4e8d9673da19c5500250d2b7ef034b1a716145f7f8d9d2197679c1f35",
+  "originHash" : "f26e411aaf4c76e60e233c2317b91c7b222ba85d50c50373e10dccfffa8a6fe2",
   "pins" : [
     {
       "identity" : "defaults",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "49c3fc04ea827f816df67843bfcc57286b47ff06",
         "version" : "3.0.1"
+      }
+    },
+    {
+      "identity" : "snapcore",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AryanRogye/SnapCore",
+      "state" : {
+        "branch" : "main",
+        "revision" : "97f51f3e5a865ddd5fe7bbfc68da61b20786a680"
       }
     },
     {

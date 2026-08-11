@@ -231,6 +231,7 @@ extension MenuBarCoordinator {
     }
 }
 
+// MARK: - Update Observation
 extension MenuBarCoordinator {
     private func observeUpdates() {
         observeAppcastAndUpdaterState()
