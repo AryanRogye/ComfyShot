@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppKit
 
 final class SettingsCoordinator {
     
@@ -22,10 +23,25 @@ final class SettingsCoordinator {
     }
     
     public func open() {
-        self.windowCoordinator.showWindow(
+        
+        // show icon on open
+        NSApplication.shared.setActivationPolicy(.regular)
+        
+        let window = self.windowCoordinator.showWindow(
             id: id,
             title: "Settings",
-            content: SettingsView(defaultsManager: defaultsManager)
+            content: SettingsView(defaultsManager: defaultsManager),
+            onClose: {
+                NSApplication.shared.setActivationPolicy(.accessory)
+            }
         )
+        
+        window.orderFrontRegardless()
+        
+        DispatchQueue.main.async {
+            NSApp.activate()
+            window.makeKeyAndOrderFront(nil)
+            window.orderFrontRegardless()
+        }
     }
 }

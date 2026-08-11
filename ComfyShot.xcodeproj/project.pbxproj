@@ -69,6 +69,11 @@
 		9BF12645302ABA1800449787 /* ComfyShot.icon in Resources */ = {isa = PBXBuildFile; fileRef = 9BF12644302ABA1800449787 /* ComfyShot.icon */; };
 		9BF126A0302AC29C00449787 /* SnapCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BF1269F302AC29C00449787 /* SnapCore */; };
 		9BF126A2302AC29C00449787 /* SnapCoreEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 9BF126A1302AC29C00449787 /* SnapCoreEngine */; };
+		9BF126A5302AC65700449787 /* SettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF126A4302AC65700449787 /* SettingsTab.swift */; };
+		9BF126A7302AC6CF00449787 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF126A6302AC6CF00449787 /* GeneralSettings.swift */; };
+		9BF126A9302AC6DF00449787 /* ShortcutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF126A8302AC6DC00449787 /* ShortcutSettings.swift */; };
+		9BF126B7302AD31200449787 /* CustomShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF126B6302AD30F00449787 /* CustomShortcutRecorder.swift */; };
+		9BF126B9302AD33200449787 /* ShortcutAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF126B8302AD33200449787 /* ShortcutAction.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -130,6 +135,11 @@
 		9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateUserDriver.swift; sourceTree = "<group>"; };
 		9B965D45302A87B6003000F0 /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
 		9BF12644302ABA1800449787 /* ComfyShot.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = ComfyShot.icon; sourceTree = "<group>"; };
+		9BF126A4302AC65700449787 /* SettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTab.swift; sourceTree = "<group>"; };
+		9BF126A6302AC6CF00449787 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
+		9BF126A8302AC6DC00449787 /* ShortcutSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutSettings.swift; sourceTree = "<group>"; };
+		9BF126B6302AD30F00449787 /* CustomShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomShortcutRecorder.swift; sourceTree = "<group>"; };
+		9BF126B8302AD33200449787 /* ShortcutAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutAction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -275,7 +285,10 @@
 		9B4B7026302A7C92008101B9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				9BF126B5302AD2E900449787 /* Components */,
 				9B4B7025302A7C92008101B9 /* SettingsView.swift */,
+				9BF126A6302AC6CF00449787 /* GeneralSettings.swift */,
+				9BF126A8302AC6DC00449787 /* ShortcutSettings.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -283,6 +296,7 @@
 		9B4B7027302A7C92008101B9 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				9BF126A3302AC65200449787 /* Models */,
 				9B4B7026302A7C92008101B9 /* Views */,
 			);
 			path = Settings;
@@ -371,6 +385,23 @@
 			path = Updates;
 			sourceTree = "<group>";
 		};
+		9BF126A3302AC65200449787 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				9BF126B8302AD33200449787 /* ShortcutAction.swift */,
+				9BF126A4302AC65700449787 /* SettingsTab.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		9BF126B5302AD2E900449787 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				9BF126B6302AD30F00449787 /* CustomShortcutRecorder.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -457,6 +488,7 @@
 				9B4B7043302A7C92008101B9 /* HotKeyCoordinator.swift in Sources */,
 				9B4B7044302A7C92008101B9 /* MenuBarCoordinator.swift in Sources */,
 				9B4B7045302A7C92008101B9 /* PermissionCoordinator.swift in Sources */,
+				9BF126B7302AD31200449787 /* CustomShortcutRecorder.swift in Sources */,
 				9B965D42302A87A0003000F0 /* UpdaterViewModel.swift in Sources */,
 				9B4B7046302A7C92008101B9 /* SettingsCoordinator.swift in Sources */,
 				9B4B7047302A7C92008101B9 /* WindowCoordinator.swift in Sources */,
@@ -477,6 +509,7 @@
 				9B4B7056302A7C92008101B9 /* AXUIElement+ScrollingCapture.swift in Sources */,
 				9B4B7057302A7C92008101B9 /* ScrollingCaptureDiscoverer.swift in Sources */,
 				9B965D44302A87AD003000F0 /* UpdateUserDriver.swift in Sources */,
+				9BF126B9302AD33200449787 /* ShortcutAction.swift in Sources */,
 				9B4B7058302A7C92008101B9 /* ScrollingCaptureService.swift in Sources */,
 				9B4B7059302A7C92008101B9 /* ScrollingCaptureStitcher.swift in Sources */,
 				9B4B705A302A7C92008101B9 /* SelectionOverlay.swift in Sources */,
@@ -488,6 +521,8 @@
 				9B4B705F302A7C92008101B9 /* PermissionView.swift in Sources */,
 				9B4B7060302A7C92008101B9 /* DefaultKeys.swift in Sources */,
 				9B4B7061302A7C92008101B9 /* DefaultsManager.swift in Sources */,
+				9BF126A5302AC65700449787 /* SettingsTab.swift in Sources */,
+				9BF126A9302AC6DF00449787 /* ShortcutSettings.swift in Sources */,
 				9B4B7062302A7C92008101B9 /* SettingsView.swift in Sources */,
 				9B4B7063302A7C92008101B9 /* DisplayIdentity.swift in Sources */,
 				9B4B7064302A7C92008101B9 /* DisplayImageStackModel.swift in Sources */,
@@ -497,6 +532,7 @@
 				9B4B7068302A7C92008101B9 /* AppKitOverflowGallery.swift in Sources */,
 				9B4B7069302A7C92008101B9 /* ImageContainer.swift in Sources */,
 				9B4B706A302A7C92008101B9 /* ImageStackView.swift in Sources */,
+				9BF126A7302AC6CF00449787 /* GeneralSettings.swift in Sources */,
 				9B4B706B302A7C92008101B9 /* OverflowSection.swift in Sources */,
 				9B4B706C302A7C92008101B9 /* UserImageView.swift in Sources */,
 				9B4B706D302A7C92008101B9 /* DisplayImageStack.swift in Sources */,

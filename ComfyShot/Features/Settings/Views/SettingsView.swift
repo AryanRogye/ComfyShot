@@ -10,27 +10,25 @@ import SwiftUI
 struct SettingsView: View {
     
     @Bindable var defaultsManager: DefaultsManager
+    @AppStorage("SelectedTab") private var selectedTab: SettingsTab = .general
     
     var body: some View {
-        Form {
-            VStack(alignment: .leading) {
-                Toggle("Capture Area over macOS Screenshot UI", isOn: $defaultsManager.captureOverAppleScreenshotUI)
-                Text("""
-                Experimental. Allows ComfyShot to appear above Apple's Screenshot UI.
-                
-                Moving or resizing an existing selection may not work correctly while Apple's Screenshot UI is open.
-                """)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                
-                Divider()
-                
-                Slider(value: $defaultsManager.selectionRectOpacity, in: 0.1...0.9, step: 0.1) {
-                    Text("Selection Rect Opacity: \(Int(defaultsManager.selectionRectOpacity * 100))%")
+        NavigationSplitView {
+            List(selection: $selectedTab) {
+                ForEach(SettingsTab.allCases, id: \.self) { tab in
+                    Label(tab.rawValue, systemImage: tab.label)
                 }
-
             }
+        } detail: {
+            NavigationStack {
+                switch selectedTab {
+                case .general:
+                    GeneralSettings(defaultsManager: defaultsManager)
+                case .shortcuts:
+                    ShortcutSettings()
+                }
+            }
+            .navigationTitle("General")
         }
-        .formStyle(.grouped)
     }
 }

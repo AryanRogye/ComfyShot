@@ -271,6 +271,13 @@ extension WindowCoordinator {
 }
 
 extension WindowCoordinator {
+    public func window(forID id: String) -> NSWindow? {
+        return windows[id]
+    }
+}
+
+// MARK: - Actions
+extension WindowCoordinator {
     func closeWindow(id: String) {
         windows[id]?.close()
         /// windowWillClose will be called automatically
