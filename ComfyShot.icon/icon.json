@@ -1,0 +1,43 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "display-p3:0.14118,0.16863,0.28235,1.00000",
+      "srgb:0.25873,0.38904,0.62806,1.00000"
+    ]
+  },
+  "groups" : [
+    {
+      "blend-mode" : "normal",
+      "hidden" : false,
+      "layers" : [
+        {
+          "image-name" : "ComfyShotLogo4.png",
+          "name" : "ComfyShotLogo4",
+          "position" : {
+            "scale" : 0.93,
+            "translation-in-points" : [
+              -97.92312500000003,
+              32.549999999999955
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : false,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.25
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

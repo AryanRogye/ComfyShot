@@ -66,6 +66,7 @@
 		9BD9DA392FF463950057344F /* SnapCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DA382FF463950057344F /* SnapCore */; };
 		9BD9DA6D2FF46E210057344F /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DA6C2FF46E210057344F /* KeyboardShortcuts */; };
 		9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DAC12FF4E8FC0057344F /* Defaults */; };
+		9BF12645302ABA1800449787 /* ComfyShot.icon in Resources */ = {isa = PBXBuildFile; fileRef = 9BF12644302ABA1800449787 /* ComfyShot.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -126,6 +127,7 @@
 		9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
 		9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateUserDriver.swift; sourceTree = "<group>"; };
 		9B965D45302A87B6003000F0 /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
+		9BF12644302ABA1800449787 /* ComfyShot.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = ComfyShot.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				9B4B703E302A7C92008101B9 /* ComfyShot */,
+				9BF12644302ABA1800449787 /* ComfyShot.icon */,
 				000000000000000000000020 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -433,6 +436,7 @@
 			isa = PBXResourcesBuildPhase;
 			files = (
 				9B4B703F302A7C92008101B9 /* Assets.xcassets in Resources */,
+				9BF12645302ABA1800449787 /* ComfyShot.icon in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
@@ -635,7 +639,7 @@
 		000000000000000111000000 /* Debug configuration for PBXNativeTarget "ComfyShot" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = ComfyShot;
 				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -690,7 +694,7 @@
 		000000000000000112000000 /* Release configuration for PBXNativeTarget "ComfyShot" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = ComfyShot;
 				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
