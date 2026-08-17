@@ -140,9 +140,11 @@ enum UserImageSizing {
     private static let maxImageWidth: CGFloat = 300
     private static let maxImageHeight: CGFloat = 360
     
-    // min: 100x120
-    private static let minImageWidth: CGFloat = 100
-    private static let minImageHeight: CGFloat = 120
+    // Thin captures still need enough room for overlay actions. This floor
+    // leaves the leading and trailing controls separated, with space for the
+    // controls row to grow, while the image itself remains aspect-fitted.
+    private static let minContainerWidth: CGFloat = 240
+    private static let minContainerHeight: CGFloat = 160
     
     
     public static func sizeForImage(_ image: CGImage, on screen: NSScreen) -> NSSize {
@@ -165,8 +167,8 @@ enum UserImageSizing {
     public static func containerSizeForImage(_ image: CGImage, on screen: NSScreen) -> NSSize {
         let imageSize = sizeForImage(image, on: screen)
         return NSSize(
-            width: max(minImageWidth, imageSize.width),
-            height: max(minImageHeight, imageSize.height)
+            width: max(minContainerWidth, imageSize.width),
+            height: max(minContainerHeight, imageSize.height)
         )
     }
 }
