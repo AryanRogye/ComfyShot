@@ -25,6 +25,7 @@ struct UserImageView: View {
     let size: NSSize
     var shadowStyle: ShadowStyle = .regular
     let onClose: () -> Void
+    let onEditImage: () -> Void
 
     @State private var hovering: Bool = false
     @State private var dragURL: URL?
@@ -59,7 +60,8 @@ struct UserImageView: View {
             UserImageControlsModifier(
                 hovering: hovering,
                 dragURL: dragURL,
-                onClose: onClose
+                onClose: onClose,
+                onEditImage: onEditImage
             )
         )
         .onHover { hovering in
@@ -80,6 +82,7 @@ private struct UserImageControlsModifier: ViewModifier {
     let hovering: Bool
     let dragURL: URL?
     let onClose: () -> Void
+    let onEditImage: () -> Void
 
     func body(content: Content) -> some View {
         content
@@ -100,7 +103,7 @@ private struct UserImageControlsModifier: ViewModifier {
                             Spacer(minLength: 8)
 
                             HStack(spacing: 8) {
-                                Button(action: {}) {
+                                Button(action: onEditImage) {
                                     Image(systemName: "pencil.tip")
                                         .modifier(UserImageControlLabelModifier())
                                 }

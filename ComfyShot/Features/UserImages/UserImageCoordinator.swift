@@ -10,6 +10,8 @@ import AppKit
 @MainActor
 final class UserImageCoordinator {
     
+    let windowCoordinator: WindowCoordinator
+    
     /// Active image stacks keyed by physical display ID. Each stack owns at most one panel.
     private var stacksByDisplay: [DisplayIdentity: DisplayImageStack] = [:]
     private var stacksAreHidden = false
@@ -19,7 +21,9 @@ final class UserImageCoordinator {
     private let imageSpacing: CGFloat = 12
     
 
-    init() {
+    init(windowCoordinator: WindowCoordinator) {
+        self.windowCoordinator = windowCoordinator
+        
         screenParametersObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
             object: nil,
@@ -36,6 +40,7 @@ final class UserImageCoordinator {
     deinit {
         if let screenParametersObserver {
             NotificationCenter.default.removeObserver(screenParametersObserver)
+            self.screenParametersObserver = nil
         }
         
         stacksByDisplay.values.forEach { $0.closePanel() }
@@ -49,7 +54,7 @@ final class UserImageCoordinator {
         // UserImageView aspect-fits the pixels inside this size, so the image is
         // never stretched while its hover target and controls remain usable.
         let size = UserImageSizing.containerSizeForImage(image, on: screen)
-        let stack = stackForDisplay(display)
+        let stack = stackForDisplay(display, sized: screen.visibleFrame)
         let userImage = UserImage(image: image, size: size)
         stack.addImage(userImage)
         stack.present(
@@ -84,12 +89,27 @@ final class UserImageCoordinator {
     
     /// Function retreives a stack for a `DisplayIdentity` if doesnt exist,
     /// we create it and return the newly created stack
-    private func stackForDisplay(_ display: DisplayIdentity) -> DisplayImageStack {
+    private func stackForDisplay(_ display: DisplayIdentity, sized size: NSRect) -> DisplayImageStack {
         if let stack = stacksByDisplay[display] {
             return stack
         }
         
-        let stack = DisplayImageStack()
+        
+        let inset = size.insetBy(dx: 100, dy: 100)
+        let editSize: NSSize = .init(width: inset.width, height: inset.height)
+        
+        let stack = DisplayImageStack { [weak self] image in
+            guard let self else { return }
+            
+            windowCoordinator.showWindow(
+                id: image.id.uuidString,
+                title: "\(image.size.width)x\(image.size.height)",
+                content: ImageEditView(image: image),
+                size: editSize,
+                alwaysActiveFocusedLook: true,
+                focusOnOpen: true,
+            )
+        }
         stacksByDisplay[display] = stack
         return stack
     }

@@ -153,6 +153,7 @@ extension WindowCoordinator {
         isMiniaturizable: Bool = false,
         isCloseable: Bool = true,
         alwaysActiveFocusedLook: Bool = false,
+        focusOnOpen: Bool = false,
         onOpen: (() -> Void)? = nil,
         onClose: (() -> Void)? = nil,
         onBlur: (() -> Void)? = nil,
@@ -201,6 +202,9 @@ extension WindowCoordinator {
         window.center()
         
         let hostingView = NSHostingView(rootView: content)
+        hostingView.sizingOptions = []
+        hostingView.frame = NSRect(origin: .zero, size: size)
+        
         hostingView.wantsLayer = true
         if makeGlass {
             hostingView.layer?.backgroundColor = NSColor.clear.cgColor
@@ -235,6 +239,16 @@ extension WindowCoordinator {
         
         if makeGlass {
             makeWindowGlass(window)
+        }
+        
+        
+        if focusOnOpen {
+            window.orderFrontRegardless()
+            DispatchQueue.main.async {
+                NSApp.activate()
+                window.makeKeyAndOrderFront(nil)
+                window.orderFrontRegardless()
+            }
         }
         
         return window

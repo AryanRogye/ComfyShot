@@ -24,6 +24,7 @@ struct ImageStackView: View {
     let spacing: CGFloat
     let placement: ImageStackPlacement
     let onClose: (UserImage) -> Void
+    let onEditImage: (UserImage) -> Void
 
     var images: [UserImage] {
         model.images
@@ -47,7 +48,8 @@ struct ImageStackView: View {
                 placement: placement,
                 spacing: spacing,
                 layout: layout,
-                onClose: onClose
+                onClose: onClose,
+                onEditImage: onEditImage
             )
             .frame(
                 width: contentWidth,

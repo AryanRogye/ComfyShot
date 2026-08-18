@@ -14,6 +14,7 @@ struct OverflowSection: View {
     let layout: ImageStackOverflowLayout
     @Binding var pendingGalleryCollapse: Task<Void, Never>?
     let onClose: (UserImage) -> Void
+    let onEditImage: (UserImage) -> Void
     
     private var galleryAnimation: Animation {
         .easeOut(duration: 0.15)
@@ -44,7 +45,8 @@ struct OverflowSection: View {
                     thumbnailSize: thumbnailSize,
                     rotation: fanRotation,
                     verticalOffset: fanVerticalOffset,
-                    onClose: onClose
+                    onClose: onClose,
+                    onEditImage: onEditImage
                 )
                 .frame(width: galleryWidth, height: Metrics.galleryHeight)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))

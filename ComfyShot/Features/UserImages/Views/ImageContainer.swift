@@ -14,6 +14,7 @@ struct ImageContainer: View {
     let spacing: CGFloat
     let layout: ImageStackOverflowLayout
     let onClose: (UserImage) -> Void
+    let onEditImage: (UserImage) -> Void
     @State private var pendingGalleryCollapse: Task<Void, Never>?
     
     private var galleryAnimation: Animation {
@@ -32,7 +33,8 @@ struct ImageContainer: View {
                     placement: placement,
                     layout: layout,
                     pendingGalleryCollapse: $pendingGalleryCollapse,
-                    onClose: onClose
+                    onClose: onClose,
+                    onEditImage: onEditImage
                 )
             }
             
@@ -41,7 +43,8 @@ struct ImageContainer: View {
                     id: userImage.id,
                     image: userImage.image,
                     size: userImage.size,
-                    onClose: { onClose(userImage) }
+                    onClose: { onClose(userImage) },
+                    onEditImage: { onEditImage(userImage) }
                 )
                 .id(userImage.id)
             }

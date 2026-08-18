@@ -19,9 +19,12 @@ class AppCoordinator {
     private let defaultsManager = DefaultsManager()
     private let menuBarCoordinator = MenuBarCoordinator()
     private let hotkeyCoordinator = HotKeyCoordinator()
-    private let userImageCoordinator = UserImageCoordinator()
     private let screenshotService = ScreenshotService()
     
+    private lazy var userImageCoordinator = UserImageCoordinator(
+        windowCoordinator: windowCoordinator
+    )
+
     private lazy var permissionCoordinator = PermissionCoordinator(
         permissionService: permissionService,
         windowCoordinator: windowCoordinator,

@@ -14,6 +14,7 @@ struct AppKitOverflowGallery: NSViewRepresentable {
     let rotation: (Int) -> Double
     let verticalOffset: (Int) -> CGFloat
     let onClose: (UserImage) -> Void
+    let onEditImage: (UserImage) -> Void
 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -73,6 +74,7 @@ struct AppKitOverflowGallery: NSViewRepresentable {
         fileprivate var rotation: (Int) -> Double
         fileprivate var verticalOffset: (Int) -> CGFloat
         fileprivate var onClose: (UserImage) -> Void
+        fileprivate var onEditImage: (UserImage) -> Void
 
         fileprivate weak var collectionView: NSCollectionView?
         fileprivate weak var scrollView: NSScrollView?
@@ -83,6 +85,7 @@ struct AppKitOverflowGallery: NSViewRepresentable {
             rotation = parent.rotation
             verticalOffset = parent.verticalOffset
             onClose = parent.onClose
+            onEditImage = parent.onEditImage
         }
 
         fileprivate func reload(
@@ -134,7 +137,12 @@ struct AppKitOverflowGallery: NSViewRepresentable {
                 position: indexPath.item,
                 count: images.count,
                 onClose: { [weak self] image in
-                    self?.onClose(image)
+                    guard let self else { return }
+                    self.onClose(image)
+                },
+                onEditImage: { [weak self] image in
+                    guard let self else { return }
+                    self.onEditImage(image)
                 }
             )
             return item
@@ -186,7 +194,8 @@ private final class OverflowGalleryItem: NSCollectionViewItem {
         verticalOffset: CGFloat,
         position: Int,
         count: Int,
-        onClose: @escaping (UserImage) -> Void
+        onClose: @escaping (UserImage) -> Void,
+        onEditImage: @escaping (UserImage) -> Void
     ) {
         hostingView?.rootView = AnyView(
             UserImageView(
@@ -194,7 +203,8 @@ private final class OverflowGalleryItem: NSCollectionViewItem {
                 image: userImage.image,
                 size: size,
                 shadowStyle: .compact,
-                onClose: { onClose(userImage) }
+                onClose: { onClose(userImage) },
+                onEditImage: { onEditImage(userImage) }
             )
             .rotationEffect(.degrees(rotation))
             .offset(y: verticalOffset)

@@ -24,6 +24,8 @@ final class DisplayImageStack {
     /// Observable state consumed by the SwiftUI image list.
     let model = DisplayImageStackModel()
     
+    let onEditImage: (UserImage) -> Void
+    
     /// Floating panel shown on the display.
     /// Created lazily the first time an image is added.
     private var panel: NSPanel?
@@ -31,7 +33,11 @@ final class DisplayImageStack {
     /// Hosts the SwiftUI content inside the floating panel.
     /// Kept alive so the root view can be updated without recreating the panel.
     private var hostingView: NSHostingView<ImageStackView>?
-
+    
+    public init(onEditImage: @escaping (UserImage) -> Void) {
+        self.onEditImage = onEditImage
+    }
+    
     func addImage(_ userImage: UserImage) {
         model.add(userImage)
     }
@@ -66,6 +72,10 @@ final class DisplayImageStack {
                 if self.model.images.isEmpty {
                     self.closePanel()
                 }
+            },
+            onEditImage: { [weak self] image in
+                guard let self else { return }
+                self.onEditImage(image)
             }
         )
 
