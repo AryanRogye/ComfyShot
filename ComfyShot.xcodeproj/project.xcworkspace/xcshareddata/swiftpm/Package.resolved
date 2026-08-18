@@ -1,5 +1,5 @@
 {
-  "originHash" : "f26e411aaf4c76e60e233c2317b91c7b222ba85d50c50373e10dccfffa8a6fe2",
+  "originHash" : "710ce5689bdd733118d068d98bf75f8efea95f843fb95ce6a9bf2582fb8f7173",
   "pins" : [
     {
       "identity" : "defaults",
@@ -11,12 +11,30 @@
       }
     },
     {
+      "identity" : "drawkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AryanRogye/DrawKit",
+      "state" : {
+        "branch" : "main",
+        "revision" : "a316696772c53bb53c0f0e738debc8edcc868303"
+      }
+    },
+    {
       "identity" : "keyboardshortcuts",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sindresorhus/KeyboardShortcuts",
       "state" : {
         "revision" : "49c3fc04ea827f816df67843bfcc57286b47ff06",
         "version" : "3.0.1"
+      }
+    },
+    {
+      "identity" : "localshortcuts",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AryanRogye/LocalShortcuts.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "beb804bd3a54a711778d62487d6d7c2dd26b4d41"
       }
     },
     {

@@ -76,41 +76,62 @@ struct UserImageView: View {
 
 // MARK: - Controls Modifier
 private struct UserImageControlsModifier: ViewModifier {
-    
+
     let hovering: Bool
     let dragURL: URL?
     let onClose: () -> Void
-    
+
     func body(content: Content) -> some View {
         content
-            .overlay(alignment: .topLeading) {
-                if hovering, let dragURL {
-                    Button {
-                        NSWorkspace.shared.open(dragURL)
-                    } label: {
-                        Text("Open")
-                            .fontWeight(.bold)
-                            .foregroundStyle(.black)
-                            .padding(4)
-                            .glassEffect(.regular, in: .rect(cornerRadius: 8))
-                    }
-                    .buttonStyle(.plain)
-                    .padding(8)
-                }
-            }
-            .overlay(alignment: .topTrailing) {
+            .overlay(alignment: .top) {
                 if hovering {
-                    Button(action: onClose) {
-                        Image(systemName: "xmark")
-                            .fontWeight(.black)
-                            .foregroundStyle(.black)
-                            .padding(4)
-                            .glassEffect(.regular, in: .rect(cornerRadius: 8))
+                    GlassEffectContainer(spacing: 8) {
+                        HStack(spacing: 8) {
+                            if let dragURL {
+                                Button {
+                                    NSWorkspace.shared.open(dragURL)
+                                } label: {
+                                    Text("Open")
+                                        .modifier(UserImageControlLabelModifier())
+                                }
+                                .buttonStyle(.plain)
+                            }
+
+                            Spacer(minLength: 8)
+
+                            HStack(spacing: 8) {
+                                Button(action: {}) {
+                                    Image(systemName: "pencil.tip")
+                                        .modifier(UserImageControlLabelModifier())
+                                }
+                                .buttonStyle(.plain)
+
+                                Button(action: onClose) {
+                                    Image(systemName: "xmark")
+                                        .modifier(UserImageControlLabelModifier())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
                     }
-                    .buttonStyle(.plain)
                     .padding(8)
                 }
             }
+    }
+}
+
+private struct UserImageControlLabelModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .fontWeight(.bold)
+            .foregroundStyle(.white)
+            .padding(4)
+            .glassEffect(
+                .regular
+                    .tint(.black.opacity(0.42))
+                    .interactive(),
+                in: .rect(cornerRadius: 8)
+            )
     }
 }
 

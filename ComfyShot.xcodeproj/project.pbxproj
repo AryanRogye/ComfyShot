@@ -59,6 +59,7 @@
 		9B4B7070302A7C92008101B9 /* CaptureInputInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B7039302A7C92008101B9 /* CaptureInputInterceptor.swift */; };
 		9B4B7071302A7C92008101B9 /* CursorHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B703A302A7C92008101B9 /* CursorHostingView.swift */; };
 		9B4B7072302A7C92008101B9 /* ScreenHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B703B302A7C92008101B9 /* ScreenHelpers.swift */; };
+		9B5C92C83033C0D500486390 /* DrawKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9B5C92C73033C0D500486390 /* DrawKit */; };
 		9B965CE5302A8544003000F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 9B965CE4302A8544003000F0 /* Sparkle */; };
 		9B965D42302A87A0003000F0 /* UpdaterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */; };
 		9B965D44302A87AD003000F0 /* UpdateUserDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */; };
@@ -147,6 +148,7 @@
 			isa = PBXFrameworksBuildPhase;
 			files = (
 				9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */,
+				9B5C92C83033C0D500486390 /* DrawKit in Frameworks */,
 				9B965CE5302A8544003000F0 /* Sparkle in Frameworks */,
 				9BF126A0302AC29C00449787 /* SnapCore in Frameworks */,
 				9BD9DA392FF463950057344F /* SnapCore in Frameworks */,
@@ -423,6 +425,7 @@
 				9B965CE4302A8544003000F0 /* Sparkle */,
 				9BF1269F302AC29C00449787 /* SnapCore */,
 				9BF126A1302AC29C00449787 /* SnapCoreEngine */,
+				9B5C92C73033C0D500486390 /* DrawKit */,
 			);
 			productName = MyApp;
 			productReference = 000000000000000000000120 /* ComfyShot.app */;
@@ -457,6 +460,7 @@
 				9BD9DAC02FF4E8FC0057344F /* XCRemoteSwiftPackageReference "Defaults" */,
 				9B965CE3302A8544003000F0 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				9BF1269E302AC29C00449787 /* XCRemoteSwiftPackageReference "SnapCore" */,
+				9B5C92C63033C0D500486390 /* XCRemoteSwiftPackageReference "DrawKit" */,
 			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 000000000000000000000020 /* Products */;
@@ -814,6 +818,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		9B5C92C63033C0D500486390 /* XCRemoteSwiftPackageReference "DrawKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AryanRogye/DrawKit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		9B965CE3302A8544003000F0 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -849,6 +861,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9B5C92C73033C0D500486390 /* DrawKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9B5C92C63033C0D500486390 /* XCRemoteSwiftPackageReference "DrawKit" */;
+			productName = DrawKit;
+		};
 		9B965CE4302A8544003000F0 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 9B965CE3302A8544003000F0 /* XCRemoteSwiftPackageReference "Sparkle" */;
