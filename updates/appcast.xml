@@ -3,12 +3,12 @@
     <channel>
         <title>ComfyShot</title>
         <item>
-            <title>0.0.3</title>
-            <pubDate>Mon, 10 Aug 2026 23:05:17 -0500</pubDate>
-            <sparkle:version>3</sparkle:version>
-            <sparkle:shortVersionString>0.0.3</sparkle:shortVersionString>
+            <title>0.0.4</title>
+            <pubDate>Tue, 18 Aug 2026 19:21:27 -0500</pubDate>
+            <sparkle:version>4</sparkle:version>
+            <sparkle:shortVersionString>0.0.4</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/AryanRogye/ComfyShot/releases/download/0.0.3/ComfyShot-Installer.dmg" length="6208374" type="application/octet-stream" sparkle:edSignature="swXMz2if2vCKvPyb7HBoJqbOwkMDpQ+/w8NaoEGJsA+kAX5UFr4HQaiK60fAK7INBCm9hOWOhgz04Dkci5ztCw=="/>
+            <enclosure url="https://github.com/AryanRogye/ComfyShot/releases/download/0.0.4/ComfyShot-Installer.dmg" length="6701774" type="application/octet-stream" sparkle:edSignature="thgTm8xf9eq6Pz4HZkAd3k3PF55mRLcQPxbzxIUJT0aItBFF3fX/GSSP2DK13Jqm+6z/2a5B/HiStWtQeY+1DQ=="/>
         </item>
     </channel>
 </rss>
