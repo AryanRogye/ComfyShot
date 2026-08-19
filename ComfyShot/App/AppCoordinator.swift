@@ -22,7 +22,8 @@ class AppCoordinator {
     private let screenshotService = ScreenshotService()
     
     private lazy var userImageCoordinator = UserImageCoordinator(
-        windowCoordinator: windowCoordinator
+        windowCoordinator: windowCoordinator,
+        defaultsManager: defaultsManager
     )
 
     private lazy var permissionCoordinator = PermissionCoordinator(

@@ -26,6 +26,8 @@ struct SettingsView: View {
                     GeneralSettings(defaultsManager: defaultsManager)
                 case .shortcuts:
                     ShortcutSettings()
+                case .editor:
+                    EditorSettings(defaultsManager: defaultsManager)
                 }
             }
             .navigationTitle("General")

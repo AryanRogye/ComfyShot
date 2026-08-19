@@ -59,9 +59,11 @@
 		9B4B7070302A7C92008101B9 /* CaptureInputInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B7039302A7C92008101B9 /* CaptureInputInterceptor.swift */; };
 		9B4B7071302A7C92008101B9 /* CursorHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B703A302A7C92008101B9 /* CursorHostingView.swift */; };
 		9B4B7072302A7C92008101B9 /* ScreenHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B703B302A7C92008101B9 /* ScreenHelpers.swift */; };
-		9B5C92C83033C0D500486390 /* DrawKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9B5C92C73033C0D500486390 /* DrawKit */; };
 		9B5C92CA3035074300486390 /* ImageEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5C92C93035074200486390 /* ImageEditView.swift */; };
 		9B5C92D23035114500486390 /* ExportImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5C92D13035114500486390 /* ExportImageView.swift */; };
+		9B5C92D5303518D800486390 /* DrawKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9B5C92D4303518D800486390 /* DrawKit */; };
+		9B5C92D730351EC500486390 /* EditorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5C92D630351EC400486390 /* EditorSettings.swift */; };
+		9B5C92DC30352D9000486390 /* DrawKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9B5C92DB30352D9000486390 /* DrawKit */; };
 		9B965CE5302A8544003000F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 9B965CE4302A8544003000F0 /* Sparkle */; };
 		9B965D42302A87A0003000F0 /* UpdaterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */; };
 		9B965D44302A87AD003000F0 /* UpdateUserDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */; };
@@ -135,6 +137,7 @@
 		9B4B703D302A7C92008101B9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B5C92C93035074200486390 /* ImageEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageEditView.swift; sourceTree = "<group>"; };
 		9B5C92D13035114500486390 /* ExportImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportImageView.swift; sourceTree = "<group>"; };
+		9B5C92D630351EC400486390 /* EditorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSettings.swift; sourceTree = "<group>"; };
 		9B965CE6302A85EA003000F0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
 		9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateUserDriver.swift; sourceTree = "<group>"; };
@@ -152,10 +155,11 @@
 			isa = PBXFrameworksBuildPhase;
 			files = (
 				9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */,
-				9B5C92C83033C0D500486390 /* DrawKit in Frameworks */,
+				9B5C92D5303518D800486390 /* DrawKit in Frameworks */,
 				9B965CE5302A8544003000F0 /* Sparkle in Frameworks */,
 				9BF126A0302AC29C00449787 /* SnapCore in Frameworks */,
 				9BD9DA392FF463950057344F /* SnapCore in Frameworks */,
+				9B5C92DC30352D9000486390 /* DrawKit in Frameworks */,
 				9BD9DA6D2FF46E210057344F /* KeyboardShortcuts in Frameworks */,
 				9BF126A2302AC29C00449787 /* SnapCoreEngine in Frameworks */,
 			);
@@ -295,6 +299,7 @@
 				9B4B7025302A7C92008101B9 /* SettingsView.swift */,
 				9BF126A6302AC6CF00449787 /* GeneralSettings.swift */,
 				9BF126A8302AC6DC00449787 /* ShortcutSettings.swift */,
+				9B5C92D630351EC400486390 /* EditorSettings.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -431,7 +436,8 @@
 				9B965CE4302A8544003000F0 /* Sparkle */,
 				9BF1269F302AC29C00449787 /* SnapCore */,
 				9BF126A1302AC29C00449787 /* SnapCoreEngine */,
-				9B5C92C73033C0D500486390 /* DrawKit */,
+				9B5C92D4303518D800486390 /* DrawKit */,
+				9B5C92DB30352D9000486390 /* DrawKit */,
 			);
 			productName = MyApp;
 			productReference = 000000000000000000000120 /* ComfyShot.app */;
@@ -466,7 +472,7 @@
 				9BD9DAC02FF4E8FC0057344F /* XCRemoteSwiftPackageReference "Defaults" */,
 				9B965CE3302A8544003000F0 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				9BF1269E302AC29C00449787 /* XCRemoteSwiftPackageReference "SnapCore" */,
-				9B5C92C63033C0D500486390 /* XCRemoteSwiftPackageReference "DrawKit" */,
+				9B5C92DA30352D9000486390 /* XCRemoteSwiftPackageReference "DrawKit" */,
 			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 000000000000000000000020 /* Products */;
@@ -497,6 +503,7 @@
 				9B4B7042302A7C92008101B9 /* ComfyShotApp.swift in Sources */,
 				9B4B7043302A7C92008101B9 /* HotKeyCoordinator.swift in Sources */,
 				9B4B7044302A7C92008101B9 /* MenuBarCoordinator.swift in Sources */,
+				9B5C92D730351EC500486390 /* EditorSettings.swift in Sources */,
 				9B4B7045302A7C92008101B9 /* PermissionCoordinator.swift in Sources */,
 				9BF126B7302AD31200449787 /* CustomShortcutRecorder.swift in Sources */,
 				9B965D42302A87A0003000F0 /* UpdaterViewModel.swift in Sources */,
@@ -696,7 +703,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = ComfyShot;
 				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = B9P888266K;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -724,7 +731,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26;
-				MARKETING_VERSION = 0.0.3;
+				MARKETING_VERSION = 0.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "devplaceholder.$(PROJECT_UNIQUE_VALUE:identifier).$(PRODUCT_NAME:identifier)";
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=*]" = com.aryanrogye.ComfyShot.debug;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -753,7 +760,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = ComfyShot;
 				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = B9P888266K;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -781,7 +788,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26;
-				MARKETING_VERSION = 0.0.3;
+				MARKETING_VERSION = 0.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "devplaceholder.$(PROJECT_UNIQUE_VALUE:identifier).$(PRODUCT_NAME:identifier)";
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = com.aryanrogye.ComfyShot;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -826,7 +833,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		9B5C92C63033C0D500486390 /* XCRemoteSwiftPackageReference "DrawKit" */ = {
+		9B5C92DA30352D9000486390 /* XCRemoteSwiftPackageReference "DrawKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AryanRogye/DrawKit";
 			requirement = {
@@ -869,9 +876,13 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		9B5C92C73033C0D500486390 /* DrawKit */ = {
+		9B5C92D4303518D800486390 /* DrawKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9B5C92C63033C0D500486390 /* XCRemoteSwiftPackageReference "DrawKit" */;
+			productName = DrawKit;
+		};
+		9B5C92DB30352D9000486390 /* DrawKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9B5C92DA30352D9000486390 /* XCRemoteSwiftPackageReference "DrawKit" */;
 			productName = DrawKit;
 		};
 		9B965CE4302A8544003000F0 /* Sparkle */ = {

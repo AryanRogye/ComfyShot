@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ImageEditView: View {
     let image: UserImage
+    @Bindable var defaultSelection: DefaultSelection
     @State private var editor: DrawEditor?
     
     var body: some View {
@@ -23,7 +24,7 @@ struct ImageEditView: View {
                     let cgImage = image.image
                     let size = NSSize(width: cgImage.width / 2, height: cgImage.height / 2)
                     let nsImage = NSImage(cgImage: cgImage, size: size)
-                    editor = .init(image: nsImage)
+                    editor = .init(image: nsImage, defaultSelection: defaultSelection)
                 }
         }
     }

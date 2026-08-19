@@ -11,6 +11,7 @@ import AppKit
 final class UserImageCoordinator {
     
     let windowCoordinator: WindowCoordinator
+    let defaultsManager: DefaultsManager
     
     /// Active image stacks keyed by physical display ID. Each stack owns at most one panel.
     private var stacksByDisplay: [DisplayIdentity: DisplayImageStack] = [:]
@@ -21,8 +22,9 @@ final class UserImageCoordinator {
     private let imageSpacing: CGFloat = 12
     
 
-    init(windowCoordinator: WindowCoordinator) {
+    init(windowCoordinator: WindowCoordinator, defaultsManager: DefaultsManager) {
         self.windowCoordinator = windowCoordinator
+        self.defaultsManager = defaultsManager
         
         screenParametersObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification,
@@ -104,7 +106,10 @@ final class UserImageCoordinator {
             windowCoordinator.showWindow(
                 id: image.id.uuidString,
                 title: "\(image.size.width)x\(image.size.height)",
-                content: ImageEditView(image: image),
+                content: ImageEditView(
+                    image: image,
+                    defaultSelection: defaultsManager.editorDefaultSelection
+                ),
                 size: editSize,
                 alwaysActiveFocusedLook: true,
                 focusOnOpen: true,
