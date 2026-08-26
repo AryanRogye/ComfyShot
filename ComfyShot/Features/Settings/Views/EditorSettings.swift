@@ -54,6 +54,20 @@ struct EditorSettings: View {
                         triangleDefaultSelection: defaultsManager.editorDefaultSelection.triangleSelection
                     )
                 }
+                Section("Arrow") {
+                    ArrowDefaultSelectionCornerRadiusView(
+                        arrowDefaultSelection: defaultsManager.editorDefaultSelection.arrowSelection
+                    )
+                    ArrowDefaultSelectionStrokeWidthView(
+                        arrowDefaultSelection: defaultsManager.editorDefaultSelection.arrowSelection
+                    )
+                    ArrowDefaultSelectionStrokeColorView(
+                        arrowDefaultSelection: defaultsManager.editorDefaultSelection.arrowSelection
+                    )
+                    ArrowDefaultSelectionOverrideColorView(
+                        arrowDefaultSelection: defaultsManager.editorDefaultSelection.arrowSelection
+                    )
+                }
             }
         }
         .formStyle(.grouped)
