@@ -24,9 +24,11 @@ final class MenuBarCoordinator: NSObject {
     private var captureScreenMenuItem: NSMenuItem?
     private var captureAreaMenuItem: NSMenuItem?
     private var scrollingCaptureMenuItem: NSMenuItem?
+    private var recordFrameMenuItem: NSMenuItem?
 
     var onCaptureScreen: (() -> Void)?
     var onCaptureArea: (() -> Void)?
+    var onRecordFrame: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onScrollingCapture: (() -> Void)?
 
@@ -41,6 +43,7 @@ final class MenuBarCoordinator: NSObject {
         updateController: UpdateController,
         onCaptureScreen: @escaping () -> Void,
         onCaptureArea: @escaping () -> Void,
+        onRecordFrame: @escaping () -> Void,
         onOpenSettings: @escaping () -> Void,
         onScrollingCapture: @escaping () -> Void
     ) {
@@ -49,6 +52,7 @@ final class MenuBarCoordinator: NSObject {
         self.onCaptureArea = onCaptureArea
         self.onCaptureScreen = onCaptureScreen
         self.onOpenSettings = onOpenSettings
+        self.onRecordFrame = onRecordFrame
         self.onScrollingCapture = onScrollingCapture
         configureStatusItem()
         configureMenu()
@@ -93,6 +97,10 @@ extension MenuBarCoordinator {
         onCaptureScreen?()
     }
 
+    @objc private func recordFrame(_ sender: NSMenuItem) {
+        onRecordFrame?()
+    }
+
     @objc private func captureArea(_ sender: NSMenuItem) {
         onCaptureArea?()
     }
@@ -104,30 +112,7 @@ extension MenuBarCoordinator {
 }
 
 extension MenuBarCoordinator {
-    
-    private func refreshUpdateMenuItems() {
-        guard let updaterVM else { return }
-        
-        checkForUpdatesMenuItem?.title = updaterVM.checkForUpdatesTitle
-        
-        updateStatusMenuItem?.title =
-        updaterVM.updateStatusLine
-        ?? "Version \(Bundle.main.versionNumber)"
-    }
-
-    /// this is meant to be called when hotkeys change
-    private func refreshCaptureHotkeys() {
-        if let captureScreenMenuItem {
-            captureScreenMenuItem.keyEquivalent = KeyboardShortcuts.Name.captureScreen.shortcut?.nsMenuItemKeyEquivalent ?? ""
-        }
-        if let captureAreaMenuItem {
-            captureAreaMenuItem.keyEquivalent = KeyboardShortcuts.Name.captureArea.shortcut?.nsMenuItemKeyEquivalent ?? ""
-        }
-        if let scrollingCaptureMenuItem {
-            scrollingCaptureMenuItem.keyEquivalent = KeyboardShortcuts.Name.scrollingCapture.shortcut?.nsMenuItemKeyEquivalent ?? ""
-        }
-    }
-
+    /// This creates the menubar icon
     private func configureStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         
@@ -149,7 +134,8 @@ extension MenuBarCoordinator {
         button.toolTip = "ComfyShot"
         button.setAccessibilityLabel("ComfyShot")
     }
-    
+
+    /// this configures the menubar items view
     private func configureMenu() {
         guard let updaterVM else { return }
         let menu = NSMenu()
@@ -178,13 +164,20 @@ extension MenuBarCoordinator {
             action: #selector(scrollingCapture(_:))
         )
 
+        let recordFrameMenuItem = makeMenuItem(
+            title: "Record Frame",
+            action: #selector(recordFrame(_:))
+        )
+
         self.captureScreenMenuItem = captureScreenMenuItem
         self.captureAreaMenuItem = captureAreaMenuItem
         self.scrollingCaptureMenuItem = scrollingCaptureMenuItem
+        self.recordFrameMenuItem = recordFrameMenuItem
 
         menu.addItem(captureScreenMenuItem)
         menu.addItem(captureAreaMenuItem)
         menu.addItem(scrollingCaptureMenuItem)
+        menu.addItem(recordFrameMenuItem)
 
         menu.addItem(.separator())
         
@@ -225,6 +218,35 @@ extension MenuBarCoordinator {
     }
 }
 
+// MARK: - Refresh Menubar Items
+extension MenuBarCoordinator {
+
+    private func refreshUpdateMenuItems() {
+        guard let updaterVM else { return }
+
+        checkForUpdatesMenuItem?.title = updaterVM.checkForUpdatesTitle
+
+        updateStatusMenuItem?.title =
+        updaterVM.updateStatusLine
+        ?? "Version \(Bundle.main.versionNumber)"
+    }
+
+    /// this is meant to be called when hotkeys change
+    private func refreshCaptureHotkeys() {
+        if let captureScreenMenuItem {
+            captureScreenMenuItem.keyEquivalent = KeyboardShortcuts.Name.captureScreen.shortcut?.nsMenuItemKeyEquivalent ?? ""
+        }
+        if let captureAreaMenuItem {
+            captureAreaMenuItem.keyEquivalent = KeyboardShortcuts.Name.captureArea.shortcut?.nsMenuItemKeyEquivalent ?? ""
+        }
+        if let scrollingCaptureMenuItem {
+            scrollingCaptureMenuItem.keyEquivalent = KeyboardShortcuts.Name.scrollingCapture.shortcut?.nsMenuItemKeyEquivalent ?? ""
+        }
+    }
+
+}
+
+// MARK: - Menubar Creation
 extension MenuBarCoordinator {
     private func makeMenuItem(
         title: String,

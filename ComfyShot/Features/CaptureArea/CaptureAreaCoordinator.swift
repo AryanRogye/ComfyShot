@@ -9,10 +9,17 @@ import AppKit
 import SnapCore
 import SwiftUI
 
+enum ScreenCaptureOptions {
+    case none
+    case scrollingCapture
+    case recordFrame
+}
+
 final class CaptureAreaCoordinator {
     
     private let defaultsManager: DefaultsManager
     private let screenshot    : any ScreenshotProviding
+    private let screenRecord  : any ScreenRecordProviding
 
     /// set by `AppCoordinator`
     public var onCaptureImage: ((CGImage, NSScreen) -> Void)?
@@ -30,12 +37,16 @@ final class CaptureAreaCoordinator {
     private var models: [CGDirectDisplayID: CaptureAreaModel] = [:]
     private var pendingHide   : DispatchWorkItem?
 
-    private var isStartingScrollCapture: Bool = false
+    private var screenCaptureOptions: ScreenCaptureOptions = .none
 
-    
-    public init(defaultsManager: DefaultsManager, screenshot: any ScreenshotProviding) {
+    public init(
+        defaultsManager: DefaultsManager,
+        screenshot: any ScreenshotProviding,
+        screenRecord: any ScreenRecordProviding
+    ) {
         self.defaultsManager = defaultsManager
         self.screenshot = screenshot
+        self.screenRecord = screenRecord
     }
 
     private func model(for screen: NSScreen) -> CaptureAreaModel {
@@ -53,7 +64,7 @@ final class CaptureAreaCoordinator {
     }
 
     // MARK: - Show Hide Overlay
-    public func show(withScrollCapture: Bool = false) {
+    public func show(screenCaptureOptions: ScreenCaptureOptions = .none) {
         pendingHide?.cancel()
         pendingHide = nil
         
@@ -61,8 +72,8 @@ final class CaptureAreaCoordinator {
             print("Can't show, no screens")
             return
         }
-        
-        isStartingScrollCapture = withScrollCapture
+
+        self.screenCaptureOptions = screenCaptureOptions
 
         // setup all the overlays
         setupOverlaysForAllScreens()
@@ -95,7 +106,7 @@ final class CaptureAreaCoordinator {
     }
     
     public func hide() {
-        isStartingScrollCapture = false
+        screenCaptureOptions = .none
         if defaultsManager.captureOverAppleScreenshotUI {
             appleScreenshotInputBridge.stop()
         }
@@ -123,7 +134,7 @@ final class CaptureAreaCoordinator {
     private func hideImmediatelyForScrollingCapture() {
         pendingHide?.cancel()
         pendingHide = nil
-        isStartingScrollCapture = false
+        self.screenCaptureOptions = .none
 
         closeAndResetOverlayPanels()
         NSCursor.arrow.set()
@@ -221,27 +232,16 @@ extension CaptureAreaCoordinator {
 
         model.capture = { [weak self] rect in
             guard let self else { return }
-            
-            let scrollCapture = self.isStartingScrollCapture
+
             let captureTarget = self.captureTarget(for: rect, on: screen)
             let targetPoint = accessibilityTargetPoint(
                 for: captureTarget.rect,
                 on: captureTarget.screen
             )
-            
-            if scrollCapture {
-                self.hideImmediatelyForScrollingCapture()
-            } else {
+
+            switch screenCaptureOptions {
+            case .none:
                 self.hide()
-            }
-            
-            if scrollCapture {
-                self.startScrollingCapture(
-                    screen: captureTarget.screen,
-                    rect: captureTarget.rect,
-                    targetPoint: targetPoint
-                )
-            } else {
                 Task { @MainActor [weak self] in
                     guard let self else { return }
                     if let image = await self.screenshot.takeScreenshot(
@@ -252,7 +252,20 @@ extension CaptureAreaCoordinator {
                     }
                     self.onCaptureFinished?()
                 }
+            case .recordFrame:
+                self.hide()
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
+                }
+            case .scrollingCapture:
+                self.hideImmediatelyForScrollingCapture()
+                self.startScrollingCapture(
+                    screen: captureTarget.screen,
+                    rect: captureTarget.rect,
+                    targetPoint: targetPoint
+                )
             }
+
         }
         
         model.onSelectionBegan = { [weak self, weak model] in

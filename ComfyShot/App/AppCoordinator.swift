@@ -20,7 +20,8 @@ class AppCoordinator {
     private let menuBarCoordinator = MenuBarCoordinator()
     private let hotkeyCoordinator = HotKeyCoordinator()
     private let screenshotService = ScreenshotService()
-    
+    private let screenRecordService = ScreenRecordService()
+
     private lazy var userImageCoordinator = UserImageCoordinator(
         windowCoordinator: windowCoordinator,
         defaultsManager: defaultsManager
@@ -37,7 +38,8 @@ class AppCoordinator {
     
     private lazy var captureAreaCoordinator = CaptureAreaCoordinator(
         defaultsManager: defaultsManager,
-        screenshot: screenshotService
+        screenshot: screenshotService,
+        screenRecord: screenRecordService,
     )
     private lazy var settingsCoordinator = SettingsCoordinator(
         windowCoordinator: windowCoordinator,
@@ -107,12 +109,18 @@ class AppCoordinator {
             self.userImageCoordinator.hideAll()
             self.captureAreaCoordinator.show()
         }
-        
+
+        let onRecordFrame = { [weak self] in
+            guard let self else { return }
+            self.userImageCoordinator.hideAll()
+            self.captureAreaCoordinator.show(screenCaptureOptions: .recordFrame)
+        }
+
         /// Scrolling Capture to capture scrolling in a area
         let onScrollingCapture = { [weak self] in
             guard let self else { return }
             self.userImageCoordinator.hideAll()
-            self.captureAreaCoordinator.show(withScrollCapture: true)
+            self.captureAreaCoordinator.show(screenCaptureOptions: .scrollingCapture)
         }
         
         /// Open Settings
@@ -127,6 +135,7 @@ class AppCoordinator {
             updateController: updateController,
             onCaptureScreen: onCaptureScreen,
             onCaptureArea: onCaptureArea,
+            onRecordFrame: onRecordFrame,
             onOpenSettings: onOpenSettings,
             onScrollingCapture: onScrollingCapture,
         )
