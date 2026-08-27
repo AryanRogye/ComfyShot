@@ -13,18 +13,29 @@ final class MenuBarCoordinator: NSObject {
     
     private var updaterVM: UpdaterViewModel?
     private var updateController: UpdateController?
-    
+
+    private var shortcutObserver: NSObjectProtocol?
+
     private var statusItem: NSStatusItem?
     private var menu: NSMenu?
     
     private var checkForUpdatesMenuItem: NSMenuItem?
     private var updateStatusMenuItem: NSMenuItem?
-    
+    private var captureScreenMenuItem: NSMenuItem?
+    private var captureAreaMenuItem: NSMenuItem?
+    private var scrollingCaptureMenuItem: NSMenuItem?
+
     var onCaptureScreen: (() -> Void)?
     var onCaptureArea: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onScrollingCapture: (() -> Void)?
-    
+
+    deinit {
+        if let shortcutObserver {
+            NotificationCenter.default.removeObserver(shortcutObserver)
+        }
+    }
+
     public func start(
         updaterVM: UpdaterViewModel,
         updateController: UpdateController,
@@ -42,6 +53,7 @@ final class MenuBarCoordinator: NSObject {
         configureStatusItem()
         configureMenu()
         observeUpdates()
+        observeShortcutChanges()
     }
     
     public func stop() {
@@ -52,7 +64,10 @@ final class MenuBarCoordinator: NSObject {
         
         menu = nil
     }
-    
+}
+
+// MARK: - Menubar Actions
+extension MenuBarCoordinator {
     @objc private func quit(_ sender: NSMenuItem) {
         let alert = AlertMaker.makeAlert(
             messageText: "Quit ComfyShot?",
@@ -60,31 +75,32 @@ final class MenuBarCoordinator: NSObject {
             style: .warning,
             buttons: ["Quit", "Cancel"]
         )
-        
+
         if alert.runModal() == .alertFirstButtonReturn {
             NSApp.terminate(nil)
         }
     }
-    
+
     @objc private func scrollingCapture(_ sender: NSMenuItem) {
         onScrollingCapture?()
     }
-    
+
     @objc private func openSettings(_ sender: NSMenuItem) {
         onOpenSettings?()
     }
-    
+
     @objc private func captureScreen(_ sender: NSMenuItem) {
         onCaptureScreen?()
     }
-    
+
     @objc private func captureArea(_ sender: NSMenuItem) {
         onCaptureArea?()
     }
-    
+
     @objc private func checkForUpdates(_ sender: NSMenuItem) {
         updateController?.checkForUpdates()
     }
+
 }
 
 extension MenuBarCoordinator {
@@ -98,7 +114,20 @@ extension MenuBarCoordinator {
         updaterVM.updateStatusLine
         ?? "Version \(Bundle.main.versionNumber)"
     }
-    
+
+    /// this is meant to be called when hotkeys change
+    private func refreshCaptureHotkeys() {
+        if let captureScreenMenuItem {
+            captureScreenMenuItem.keyEquivalent = KeyboardShortcuts.Name.captureScreen.shortcut?.nsMenuItemKeyEquivalent ?? ""
+        }
+        if let captureAreaMenuItem {
+            captureAreaMenuItem.keyEquivalent = KeyboardShortcuts.Name.captureArea.shortcut?.nsMenuItemKeyEquivalent ?? ""
+        }
+        if let scrollingCaptureMenuItem {
+            scrollingCaptureMenuItem.keyEquivalent = KeyboardShortcuts.Name.scrollingCapture.shortcut?.nsMenuItemKeyEquivalent ?? ""
+        }
+    }
+
     private func configureStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         
@@ -128,27 +157,35 @@ extension MenuBarCoordinator {
         
         menu.addItem(.sectionHeader(title: "Capture"))
         
-        menu.addItem(makeMenuItem(
+        let captureScreenMenuItem = makeMenuItem(
             title: "Capture Screen",
             systemImageName: "display",
             shortcut: KeyboardShortcuts.Name.captureScreen.shortcut,
             action: #selector(captureScreen(_:))
-        ))
+        )
         
-        menu.addItem(makeMenuItem(
+        let captureAreaMenuItem = makeMenuItem(
             title: "Capture Area",
             systemImageName: "viewfinder",
             shortcut: KeyboardShortcuts.Name.captureArea.shortcut,
             action: #selector(captureArea(_:))
-        ))
+        )
         
-        menu.addItem(makeMenuItem(
+        let scrollingCaptureMenuItem = makeMenuItem(
             title: "Scrolling Capture",
             systemImageName: "arrow.up.and.down.text.horizontal",
             shortcut: KeyboardShortcuts.Name.scrollingCapture.shortcut,
             action: #selector(scrollingCapture(_:))
-        ))
-        
+        )
+
+        self.captureScreenMenuItem = captureScreenMenuItem
+        self.captureAreaMenuItem = captureAreaMenuItem
+        self.scrollingCaptureMenuItem = scrollingCaptureMenuItem
+
+        menu.addItem(captureScreenMenuItem)
+        menu.addItem(captureAreaMenuItem)
+        menu.addItem(scrollingCaptureMenuItem)
+
         menu.addItem(.separator())
         
         menu.addItem(.sectionHeader(title: "Updates"))
@@ -228,6 +265,21 @@ extension MenuBarCoordinator {
         }
         
         return item
+    }
+}
+
+// MARK: - Shortcut Observation
+extension MenuBarCoordinator {
+    private func observeShortcutChanges() {
+        shortcutObserver = NotificationCenter.default.addObserver(
+            forName: ShortcutRecorderModel.shortcutDidChange,
+            object: nil,
+            queue: .main,
+        ) { _ in
+            DispatchQueue.main.async {
+                self.refreshCaptureHotkeys()
+            }
+        }
     }
 }
 
