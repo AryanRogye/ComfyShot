@@ -7,6 +7,7 @@
 
 import CoreGraphics
 import Observation
+import SnapCoreEngine
 
 @Observable
 @MainActor
@@ -14,6 +15,7 @@ final class CaptureAreaModel {
 
     var dragStart: CGPoint?
     var dragCurrent: CGPoint?
+    var recorder: Recorder? = nil
     private var initialMoveStart: CGPoint?
     private var initialMoveCurrent: CGPoint?
     private var initialResizeRect: CGRect?
@@ -40,6 +42,7 @@ final class CaptureAreaModel {
     }
 
     func exit() {
+        recorder = nil
         onExit?()
     }
 

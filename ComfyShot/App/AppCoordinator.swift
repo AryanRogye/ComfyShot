@@ -7,6 +7,7 @@
 
 import AppKit
 import SnapCore
+import SnapCoreEngine
 
 @MainActor
 class AppCoordinator {
@@ -20,7 +21,7 @@ class AppCoordinator {
     private let menuBarCoordinator = MenuBarCoordinator()
     private let hotkeyCoordinator = HotKeyCoordinator()
     private let screenshotService = ScreenshotService()
-    private let screenRecordService = ScreenRecordService()
+    private let screenRecord = Recorder()
 
     private lazy var userImageCoordinator = UserImageCoordinator(
         windowCoordinator: windowCoordinator,
@@ -39,7 +40,7 @@ class AppCoordinator {
     private lazy var captureAreaCoordinator = CaptureAreaCoordinator(
         defaultsManager: defaultsManager,
         screenshot: screenshotService,
-        screenRecord: screenRecordService,
+        screenRecord: screenRecord,
     )
     private lazy var settingsCoordinator = SettingsCoordinator(
         windowCoordinator: windowCoordinator,
@@ -149,7 +150,12 @@ class AppCoordinator {
             guard let self else { return }
             self.userImageCoordinator.showAll()
         }
-        
+
+        captureAreaCoordinator.onFinishRecord = { [weak self] url, screen in
+            guard let self else { return }
+            print("Finished Recording: \(url) on screen: \(screen.description)")
+        }
+
         hotkeyCoordinator.start(
             onCaptureScreen: onCaptureScreen,
             onCaptureArea: onCaptureArea,

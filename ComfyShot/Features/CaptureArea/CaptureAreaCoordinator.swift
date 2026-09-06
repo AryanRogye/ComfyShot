@@ -7,6 +7,7 @@
 
 import AppKit
 import SnapCore
+import SnapCoreEngine
 import SwiftUI
 
 enum ScreenCaptureOptions {
@@ -19,10 +20,11 @@ final class CaptureAreaCoordinator {
     
     private let defaultsManager: DefaultsManager
     private let screenshot    : any ScreenshotProviding
-    private let screenRecord  : any ScreenRecordProviding
+    private let screenRecord  : Recorder
 
     /// set by `AppCoordinator`
     public var onCaptureImage: ((CGImage, NSScreen) -> Void)?
+    public var onFinishRecord: ((URL, NSScreen) -> Void)?
     public var onCaptureFinished: (() -> Void)?
 
     private lazy var appleScreenshotInputBridge = AppleScreenshotInputBridge()
@@ -42,7 +44,7 @@ final class CaptureAreaCoordinator {
     public init(
         defaultsManager: DefaultsManager,
         screenshot: any ScreenshotProviding,
-        screenRecord: any ScreenRecordProviding
+        screenRecord: Recorder
     ) {
         self.defaultsManager = defaultsManager
         self.screenshot = screenshot
@@ -202,7 +204,7 @@ extension CaptureAreaCoordinator {
         let overlayScreen = createPanel(for: screen)
         // create the model that belongs to the view
         let model = createModel(for: screen)
-        
+
         let view: NSView = CursorHostingView(
             rootView: SelectionOverlay(
                 model: model,
@@ -254,8 +256,25 @@ extension CaptureAreaCoordinator {
                 }
             case .recordFrame:
                 self.hide()
+                model.recorder = self.screenRecord
                 Task { @MainActor [weak self] in
                     guard let self else { return }
+                    do {
+                        try await screenRecord.toggle(with: .recordFrame(
+                            .init(
+                                screen: captureTarget.screen,
+                                frame: captureTarget.rect
+                            )
+                        ))
+                        screenRecord.onRecordingFinish = { [weak self] in
+                            guard let self else { return }
+                            let recordingInfo = screenRecord.coordinator.recordingInfo
+                            guard let url = recordingInfo.url else { return }
+                            self.onFinishRecord?(url, captureTarget.screen)
+                        }
+                    } catch {
+                        print("Error With Capturing Frame")
+                    }
                 }
             case .scrollingCapture:
                 self.hideImmediatelyForScrollingCapture()
@@ -282,6 +301,11 @@ extension CaptureAreaCoordinator {
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) { [weak self] in
                 self?.onCaptureFinished?()
+            }
+            Task {
+                if self.screenRecord.isRecording {
+                    try? await self.screenRecord.toggle()
+                }
             }
         }
         return model

@@ -72,9 +72,9 @@
 		9BD9DA6D2FF46E210057344F /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DA6C2FF46E210057344F /* KeyboardShortcuts */; };
 		9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD9DAC12FF4E8FC0057344F /* Defaults */; };
 		9BDE864B303F9B1C00DC5F92 /* DrawKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9BDE864A303F9B1C00DC5F92 /* DrawKit */; };
+		9BDE864E303F9D1E00DC5F92 /* SnapCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BDE864D303F9D1E00DC5F92 /* SnapCore */; };
+		9BDE8650303F9D1E00DC5F92 /* SnapCoreEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 9BDE864F303F9D1E00DC5F92 /* SnapCoreEngine */; };
 		9BF12645302ABA1800449787 /* ComfyShot.icon in Resources */ = {isa = PBXBuildFile; fileRef = 9BF12644302ABA1800449787 /* ComfyShot.icon */; };
-		9BF126A0302AC29C00449787 /* SnapCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BF1269F302AC29C00449787 /* SnapCore */; };
-		9BF126A2302AC29C00449787 /* SnapCoreEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 9BF126A1302AC29C00449787 /* SnapCoreEngine */; };
 		9BF126A5302AC65700449787 /* SettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF126A4302AC65700449787 /* SettingsTab.swift */; };
 		9BF126A7302AC6CF00449787 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF126A6302AC6CF00449787 /* GeneralSettings.swift */; };
 		9BF126A9302AC6DF00449787 /* ShortcutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF126A8302AC6DC00449787 /* ShortcutSettings.swift */; };
@@ -157,13 +157,13 @@
 			files = (
 				9BDE864B303F9B1C00DC5F92 /* DrawKit in Frameworks */,
 				9BD9DAC22FF4E8FC0057344F /* Defaults in Frameworks */,
+				9BDE8650303F9D1E00DC5F92 /* SnapCoreEngine in Frameworks */,
 				9B5C92D5303518D800486390 /* DrawKit in Frameworks */,
+				9BDE864E303F9D1E00DC5F92 /* SnapCore in Frameworks */,
 				9B965CE5302A8544003000F0 /* Sparkle in Frameworks */,
-				9BF126A0302AC29C00449787 /* SnapCore in Frameworks */,
 				9BD9DA392FF463950057344F /* SnapCore in Frameworks */,
 				9B5C94CE30354CCF00486390 /* DrawKit in Frameworks */,
 				9BD9DA6D2FF46E210057344F /* KeyboardShortcuts in Frameworks */,
-				9BF126A2302AC29C00449787 /* SnapCoreEngine in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -436,11 +436,11 @@
 				9BD9DA6C2FF46E210057344F /* KeyboardShortcuts */,
 				9BD9DAC12FF4E8FC0057344F /* Defaults */,
 				9B965CE4302A8544003000F0 /* Sparkle */,
-				9BF1269F302AC29C00449787 /* SnapCore */,
-				9BF126A1302AC29C00449787 /* SnapCoreEngine */,
 				9B5C92D4303518D800486390 /* DrawKit */,
 				9B5C94CD30354CCF00486390 /* DrawKit */,
 				9BDE864A303F9B1C00DC5F92 /* DrawKit */,
+				9BDE864D303F9D1E00DC5F92 /* SnapCore */,
+				9BDE864F303F9D1E00DC5F92 /* SnapCoreEngine */,
 			);
 			productName = MyApp;
 			productReference = 000000000000000000000120 /* ComfyShot.app */;
@@ -474,8 +474,8 @@
 				9BD9DA6B2FF46E210057344F /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 				9BD9DAC02FF4E8FC0057344F /* XCRemoteSwiftPackageReference "Defaults" */,
 				9B965CE3302A8544003000F0 /* XCRemoteSwiftPackageReference "Sparkle" */,
-				9BF1269E302AC29C00449787 /* XCRemoteSwiftPackageReference "SnapCore" */,
 				9BDE8649303F9B1B00DC5F92 /* XCRemoteSwiftPackageReference "DrawKit" */,
+				9BDE864C303F9D1E00DC5F92 /* XCLocalSwiftPackageReference "../SnapCore" */,
 			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 000000000000000000000020 /* Products */;
@@ -835,6 +835,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		9BDE864C303F9D1E00DC5F92 /* XCLocalSwiftPackageReference "../SnapCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../SnapCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		9B965CE3302A8544003000F0 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -863,14 +870,6 @@
 		9BDE8649303F9B1B00DC5F92 /* XCRemoteSwiftPackageReference "DrawKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AryanRogye/DrawKit";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		9BF1269E302AC29C00449787 /* XCRemoteSwiftPackageReference "SnapCore" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/AryanRogye/SnapCore";
 			requirement = {
 				branch = main;
 				kind = branch;
@@ -911,14 +910,12 @@
 			package = 9BDE8649303F9B1B00DC5F92 /* XCRemoteSwiftPackageReference "DrawKit" */;
 			productName = DrawKit;
 		};
-		9BF1269F302AC29C00449787 /* SnapCore */ = {
+		9BDE864D303F9D1E00DC5F92 /* SnapCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9BF1269E302AC29C00449787 /* XCRemoteSwiftPackageReference "SnapCore" */;
 			productName = SnapCore;
 		};
-		9BF126A1302AC29C00449787 /* SnapCoreEngine */ = {
+		9BDE864F303F9D1E00DC5F92 /* SnapCoreEngine */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9BF1269E302AC29C00449787 /* XCRemoteSwiftPackageReference "SnapCore" */;
 			productName = SnapCoreEngine;
 		};
 /* End XCSwiftPackageProductDependency section */

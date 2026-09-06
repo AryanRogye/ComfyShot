@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SnapCoreEngine
 
 struct SelectionOverlay: View {
     @Bindable var model: CaptureAreaModel
@@ -117,6 +118,20 @@ struct SelectionOverlay: View {
                     .background(.black.opacity(0.6))
                     .cornerRadius(6)
                     .padding(6)
+            }
+
+            if let recorder = model.recorder {
+                if recorder.isRecording {
+                    Button("Stop Recorder") {
+                        Task {
+                            do {
+                                try await recorder.toggle()
+                            } catch {
+
+                            }
+                        }
+                    }
+                }
             }
 
             Spacer()
