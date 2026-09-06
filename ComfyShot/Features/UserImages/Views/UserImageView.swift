@@ -72,7 +72,15 @@ struct UserImageView: View {
         .task(id: id) {
             dragURL = await UserImageExportStore.shared.dragURL(for: id, image: image)
         }
-        .draggable(dragURL ?? URL(fileURLWithPath: "/dev/null"))
+        .draggable(dragURL ?? URL(fileURLWithPath: "/dev/null")) {
+            // The default preview snapshots the glass controls and shadows above.
+            // Rendering that snapshot can crash in RenderBox.apply_custom_blend
+            // when AppKit creates the drag image. Keep this preview bitmap-only.
+            Image(decorative: image, scale: 1)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: size.width, height: size.height)
+        }
     }
 }
 
