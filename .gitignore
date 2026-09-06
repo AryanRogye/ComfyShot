@@ -44,3 +44,4 @@ fastlane/test_output/
 *.dmg
 updates/create_dmg.sh
 Assets/ComfyShotLogo.png
+Assets/ComfyShotLogoOld.png
