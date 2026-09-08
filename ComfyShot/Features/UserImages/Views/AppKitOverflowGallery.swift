@@ -8,6 +8,7 @@ import SwiftUI
 
 struct AppKitOverflowGallery: NSViewRepresentable {
     let images: [UserImage]
+    let shiftClickedImages: [UserImage]
     let viewportSize: NSSize
     let spacing: CGFloat
     let thumbnailSize: (UserImage) -> NSSize
@@ -63,11 +64,16 @@ struct AppKitOverflowGallery: NSViewRepresentable {
     func updateNSView(_ scrollView: NoScrollerScrollView, context: Context) {
         let previousIDs = context.coordinator.images.map(\.id)
         let currentIDs = images.map(\.id)
+
+        let currentShiftClicked   = shiftClickedImages.map(\.id)
+        let oldShiftClickedImages = context.coordinator.shiftClickedImages.map(\.id)
+
         let contentChanged = previousIDs != currentIDs
+        let selectionChanged = currentShiftClicked != oldShiftClickedImages
 
         context.coordinator.reload(
             with: self,
-            reloadData: contentChanged,
+            reloadData: contentChanged || selectionChanged,
             scrollToTrailingEdge: contentChanged
         )
     }
@@ -75,8 +81,8 @@ struct AppKitOverflowGallery: NSViewRepresentable {
     @MainActor
     final class Coordinator: NSObject, NSCollectionViewDataSource, NSCollectionViewDelegateFlowLayout {
         fileprivate var images: [UserImage]
+        fileprivate var shiftClickedImages: [UserImage]
         fileprivate var thumbnailSize: (UserImage) -> NSSize
-        fileprivate var isShiftClicked: (UserImage) -> Bool
         fileprivate var rotation: (Int) -> Double
         fileprivate var verticalOffset: (Int) -> CGFloat
         fileprivate var onClose: (UserImage) -> Void
@@ -94,7 +100,7 @@ struct AppKitOverflowGallery: NSViewRepresentable {
             onClose = parent.onClose
             onEditImage = parent.onEditImage
             onShiftClick = parent.onShiftClick
-            isShiftClicked = parent.isShiftClicked
+            shiftClickedImages = parent.shiftClickedImages
         }
 
         fileprivate func reload(
@@ -103,10 +109,15 @@ struct AppKitOverflowGallery: NSViewRepresentable {
             scrollToTrailingEdge: Bool
         ) {
             images = parent.images
+            shiftClickedImages = parent.shiftClickedImages
+
             thumbnailSize = parent.thumbnailSize
             rotation = parent.rotation
             verticalOffset = parent.verticalOffset
+
             onClose = parent.onClose
+            onEditImage = parent.onEditImage
+            onShiftClick = parent.onShiftClick
 
             if reloadData {
                 collectionView?.reloadData()
@@ -145,7 +156,7 @@ struct AppKitOverflowGallery: NSViewRepresentable {
                 verticalOffset: verticalOffset(indexPath.item),
                 position: indexPath.item,
                 count: images.count,
-                isShiftClicked: isShiftClicked(image),
+                isShiftClicked: shiftClickedImages.contains(where: { $0.id == image.id }),
                 onClose: { [weak self] image in
                     guard let self else { return }
                     self.onClose(image)

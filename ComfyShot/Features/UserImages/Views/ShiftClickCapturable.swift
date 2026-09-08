@@ -16,7 +16,7 @@ struct ShiftClickCapturable: NSViewRepresentable {
         return v
     }
     func updateNSView(_ nsView: ShiftClickCapturableView, context: Context) {
-
+        nsView.didShiftClick = didShiftClick
     }
 }
 
@@ -37,6 +37,13 @@ final class ShiftClickCapturableView: NSView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
 
+        if let monitor = flagsMonitor {
+            NSEvent.removeMonitor(monitor)
+            flagsMonitor = nil
+        }
+
+        guard window != nil else { return }
+
         flagsMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
             guard let self else { return event }
 
@@ -44,7 +51,7 @@ final class ShiftClickCapturableView: NSView {
 
             if self.bounds.contains(point),
                event.modifierFlags.contains(.shift) {
-                didShiftClick()
+                self.didShiftClick()
             }
 
             return event
@@ -52,7 +59,6 @@ final class ShiftClickCapturableView: NSView {
     }
 
     deinit {
-        // Guarantee clean up when the view is destroyed
         if let monitor = flagsMonitor {
             NSEvent.removeMonitor(monitor)
         }

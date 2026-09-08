@@ -343,7 +343,6 @@
 		9B4B7033302A7C92008101B9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				9B92282430507A7C006D97F5 /* ShiftClickCapturable.swift */,
 				9B4B7030302A7C92008101B9 /* ImageStackView.swift */,
 				9B4B702F302A7C92008101B9 /* ImageContainer.swift */,
 				9B4B7032302A7C92008101B9 /* UserImageView.swift */,
@@ -351,6 +350,7 @@
 				9B4B702E302A7C92008101B9 /* AppKitOverflowGallery.swift */,
 				9B5C92C93035074200486390 /* ImageEditView.swift */,
 				9B5C92D13035114500486390 /* ExportImageView.swift */,
+				9B92282430507A7C006D97F5 /* ShiftClickCapturable.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";

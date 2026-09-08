@@ -15,6 +15,12 @@ final class UserImageCoordinator {
     
     /// Active image stacks keyed by physical display ID. Each stack owns at most one panel.
     private var stacksByDisplay: [DisplayIdentity: DisplayImageStack] = [:]
+
+    public var containsShiftClicked: Bool {
+        let stacks: [DisplayImageStack] = stacksByDisplay.map { $1 }
+        return stacks.contains(where: \.containsShiftClickedImages)
+    }
+
     private var stacksAreHidden = false
     
     private var screenParametersObserver: NSObjectProtocol?
@@ -48,7 +54,13 @@ final class UserImageCoordinator {
         
         stacksByDisplay.values.forEach { $0.closePanel() }
     }
-    
+
+    public func clearShiftClicked() {
+        for stack in stacksByDisplay.values {
+            stack.unShiftClickedImages()
+        }
+    }
+
     /// function adds the image, and displays the panel onto the given screen
     /// we use ComfyNSScreen because this holds information for all we need
     /// this is because ComfyNSScreen is Sendable
@@ -56,15 +68,18 @@ final class UserImageCoordinator {
 
         guard let rawValue = screen.rawValue else { return }
         let display = DisplayIdentity(rawValue: rawValue)
+
+        // Use the minimum presentation container for unusually narrow images.
+        // UserImageView aspect-fits the pixels inside this size, so the image is
+        // never stretched while its hover target and controls remain usable.
         let size = UserImageSizing.containerSizeForImage(image, on: screen)
         let stack = stackForDisplay(display, sized: screen.visibleFrame)
 
         taskQueue.enqueue { [weak self] in
             guard let self else { return }
-            // Use the minimum presentation container for unusually narrow images.
-            // UserImageView aspect-fits the pixels inside this size, so the image is
-            // never stretched while its hover target and controls remain usable.
+
             let userImage = await UserImage(image: image, size: size)
+
             await stack.addImage(userImage)
             await stack.present(
                 on: screen,
@@ -139,7 +154,7 @@ final class UserImageCoordinator {
             
             // see if we have a currentStack for the display, and not empty
             // if is empty we just keep going on to the next screen
-            guard let stack = stacksByDisplay[display], !stack.model.images.isEmpty else {
+            guard let stack = stacksByDisplay[display], !stack.isEmpty else {
                 continue
             }
 

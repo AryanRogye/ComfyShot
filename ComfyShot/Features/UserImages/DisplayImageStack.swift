@@ -22,8 +22,13 @@ import SwiftUI
 final class DisplayImageStack {
 
     /// Observable state consumed by the SwiftUI image list.
-    let model = DisplayImageStackModel()
-    
+    private let model = DisplayImageStackModel()
+
+    /// True if images is empty, false if contains values
+    var isEmpty: Bool {
+        model.images.isEmpty
+    }
+
     let onEditImage: (UserImage) -> Void
     
     /// Floating panel shown on the display.
@@ -33,7 +38,10 @@ final class DisplayImageStack {
     /// Hosts the SwiftUI content inside the floating panel.
     /// Kept alive so the root view can be updated without recreating the panel.
     private var hostingView: NSHostingView<ImageStackView>?
-    
+
+    /// Property to indicate if model has any shift clicked images
+    private(set) var containsShiftClickedImages = false
+
     public init(onEditImage: @escaping (UserImage) -> Void) {
         self.onEditImage = onEditImage
     }
@@ -49,6 +57,11 @@ final class DisplayImageStack {
     public func show() {
         guard !model.images.isEmpty else { return }
         panel?.orderFrontRegardless()
+    }
+
+    public func unShiftClickedImages() {
+        containsShiftClickedImages = false
+        model.unShiftClickedImages()
     }
 
     /// Presents or updates the floating image stack on a display.
@@ -86,6 +99,7 @@ final class DisplayImageStack {
                 } else {
                     model.shiftClickedImages.append(image)
                 }
+                containsShiftClickedImages = !model.shiftClickedImages.isEmpty
             }
         )
 

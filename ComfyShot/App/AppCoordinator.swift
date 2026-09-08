@@ -120,8 +120,17 @@ class AppCoordinator {
             guard let self else { return }
             self.settingsCoordinator.open()
         }
-        
-        
+
+        let isSelectedScreenshotsPopulated: () -> Bool = { [weak self] in
+            guard let self else { return false }
+            return self.userImageCoordinator.containsShiftClicked
+        }
+
+        let onClearSelectedScreenshots = { [weak self] in
+            guard let self else { return }
+            self.userImageCoordinator.clearShiftClicked()
+        }
+
         menuBarCoordinator.start(
             updaterVM: updateController.updaterVM,
             updateController: updateController,
@@ -129,6 +138,8 @@ class AppCoordinator {
             onCaptureArea: onCaptureArea,
             onOpenSettings: onOpenSettings,
             onScrollingCapture: onScrollingCapture,
+            isSelectedScreenshotsPopulated: isSelectedScreenshotsPopulated,
+            onClearSelectedScreenshots: onClearSelectedScreenshots
         )
         
         captureAreaCoordinator.onCaptureImage = { [weak self] image, screen in

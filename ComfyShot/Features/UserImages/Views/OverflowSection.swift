@@ -41,6 +41,7 @@ struct OverflowSection: View {
             if model.isOverflowGalleryPresented {
                 AppKitOverflowGallery(
                     images: layout.overflowImages,
+                    shiftClickedImages: model.shiftClickedImages,
                     viewportSize: NSSize(width: galleryWidth, height: Metrics.galleryHeight),
                     spacing: Metrics.gallerySpacing,
                     thumbnailSize: thumbnailSize,

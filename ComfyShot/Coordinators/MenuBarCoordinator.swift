@@ -9,8 +9,8 @@ import AppKit
 import KeyboardShortcuts
 
 @MainActor
-final class MenuBarCoordinator: NSObject {
-    
+final class MenuBarCoordinator: NSObject, NSMenuDelegate {
+
     private var updaterVM: UpdaterViewModel?
     private var updateController: UpdateController?
 
@@ -23,12 +23,16 @@ final class MenuBarCoordinator: NSObject {
     private var updateStatusMenuItem: NSMenuItem?
     private var captureScreenMenuItem: NSMenuItem?
     private var captureAreaMenuItem: NSMenuItem?
+    private var screenshotActionDivider: NSMenuItem?
     private var scrollingCaptureMenuItem: NSMenuItem?
+    private var clearSelectedScreenshots: NSMenuItem?
 
     var onCaptureScreen: (() -> Void)?
     var onCaptureArea: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onScrollingCapture: (() -> Void)?
+    var isSelectedScreenshotsPopulated: (() -> Bool)?
+    var onClearSelectedScreenshots: (() -> Void)?
 
     deinit {
         if let shortcutObserver {
@@ -42,7 +46,9 @@ final class MenuBarCoordinator: NSObject {
         onCaptureScreen: @escaping () -> Void,
         onCaptureArea: @escaping () -> Void,
         onOpenSettings: @escaping () -> Void,
-        onScrollingCapture: @escaping () -> Void
+        onScrollingCapture: @escaping () -> Void,
+        isSelectedScreenshotsPopulated: @escaping () -> Bool,
+        onClearSelectedScreenshots: @escaping () -> Void
     ) {
         self.updaterVM = updaterVM
         self.updateController = updateController
@@ -50,6 +56,8 @@ final class MenuBarCoordinator: NSObject {
         self.onCaptureScreen = onCaptureScreen
         self.onOpenSettings = onOpenSettings
         self.onScrollingCapture = onScrollingCapture
+        self.isSelectedScreenshotsPopulated = isSelectedScreenshotsPopulated
+        self.onClearSelectedScreenshots = onClearSelectedScreenshots
         configureStatusItem()
         configureMenu()
         observeUpdates()
@@ -101,10 +109,38 @@ extension MenuBarCoordinator {
         updateController?.checkForUpdates()
     }
 
+    @objc private func clearSelected(_ sender: NSMenuItem) {
+        onClearSelectedScreenshots?()
+    }
+}
+
+// MARK: - Delegate Functions
+extension MenuBarCoordinator {
+    func menuWillOpen(_ menu: NSMenu) {
+        guard let isSelectedScreenshotsPopulated else {
+            return
+        }
+        guard let clearSelectedScreenshots else { return }
+        guard let screenshotActionDivider else { return }
+
+        if isSelectedScreenshotsPopulated() {
+            screenshotActionDivider.isHidden = false
+            clearSelectedScreenshots.isHidden = false
+            clearSelectedScreenshots.isEnabled = true
+        } else {
+            screenshotActionDivider.isHidden = true
+            clearSelectedScreenshots.isHidden = true
+            clearSelectedScreenshots.isEnabled = false
+        }
+    }
 }
 
 extension MenuBarCoordinator {
-    
+
+    private func checkSelectedScreenshots() {
+
+    }
+
     private func refreshUpdateMenuItems() {
         guard let updaterVM else { return }
         
@@ -153,6 +189,7 @@ extension MenuBarCoordinator {
     private func configureMenu() {
         guard let updaterVM else { return }
         let menu = NSMenu()
+        menu.delegate = self
         menu.autoenablesItems = false
         
         menu.addItem(.sectionHeader(title: "Capture"))
@@ -185,6 +222,18 @@ extension MenuBarCoordinator {
         menu.addItem(captureScreenMenuItem)
         menu.addItem(captureAreaMenuItem)
         menu.addItem(scrollingCaptureMenuItem)
+
+        let screenshotActionDivider = makeHiddenDivider()
+        let clearSelectedScreenshots = makeHiddenMenuItem(
+            title: "Clear Selected Screenshots",
+            action: #selector(clearSelected(_:))
+        )
+
+        self.screenshotActionDivider = screenshotActionDivider
+        self.clearSelectedScreenshots = clearSelectedScreenshots
+
+        menu.addItem(screenshotActionDivider)
+        menu.addItem(clearSelectedScreenshots)
 
         menu.addItem(.separator())
         
@@ -226,6 +275,25 @@ extension MenuBarCoordinator {
 }
 
 extension MenuBarCoordinator {
+    private func makeHiddenDivider() -> NSMenuItem {
+        let item = NSMenuItem.separator()
+        item.isHidden = true
+        return item
+    }
+
+    private func makeHiddenMenuItem(
+        title: String,
+        action: Selector
+    ) -> NSMenuItem {
+        let item = NSMenuItem(
+            title: title,
+            action: action,
+            keyEquivalent: ""
+        )
+        item.isHidden = true
+        item.target = self
+        return item
+    }
     private func makeMenuItem(
         title: String,
         systemImageName: String? = nil,
