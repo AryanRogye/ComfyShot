@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="960" alt="ComfyShot" src="https://github.com/user-attachments/assets/dbe25b19-b83c-48a6-a33d-09130d3c3845" />
+  <img width="960" alt="ComfyShotLogo" src="https://github.com/user-attachments/assets/eafc2773-7b2c-4f89-bf6c-ae88cd0b2aab" />
 </p>
 
 <p align="center">
