@@ -15,7 +15,8 @@ struct OverflowSection: View {
     @Binding var pendingGalleryCollapse: Task<Void, Never>?
     let onClose: (UserImage) -> Void
     let onEditImage: (UserImage) -> Void
-    
+    let onShiftClick: (UserImage) -> Void
+
     private var galleryAnimation: Animation {
         .easeOut(duration: 0.15)
     }
@@ -46,7 +47,13 @@ struct OverflowSection: View {
                     rotation: fanRotation,
                     verticalOffset: fanVerticalOffset,
                     onClose: onClose,
-                    onEditImage: onEditImage
+                    onEditImage: onEditImage,
+                    onShiftClick: onShiftClick,
+                    isShiftClicked: { image in
+                        return model.shiftClickedImages.contains(
+                            where: { $0.id == image.id }
+                        )
+                    }
                 )
                 .frame(width: galleryWidth, height: Metrics.galleryHeight)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))

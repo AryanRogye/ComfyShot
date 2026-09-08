@@ -64,6 +64,11 @@
 		9B5C92D5303518D800486390 /* DrawKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9B5C92D4303518D800486390 /* DrawKit */; };
 		9B5C92D730351EC500486390 /* EditorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5C92D630351EC400486390 /* EditorSettings.swift */; };
 		9B5C94CE30354CCF00486390 /* DrawKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9B5C94CD30354CCF00486390 /* DrawKit */; };
+		9B92282330507492006D97F5 /* NSScreen+rawValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9228223050748F006D97F5 /* NSScreen+rawValue.swift */; };
+		9B92282530507A7C006D97F5 /* ShiftClickCapturable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92282430507A7C006D97F5 /* ShiftClickCapturable.swift */; };
+		9B92282730509E9E006D97F5 /* DragPreviewFormation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92282630509E99006D97F5 /* DragPreviewFormation.swift */; };
+		9B9228293050A38C006D97F5 /* TaskQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9228283050A38C006D97F5 /* TaskQueue.swift */; };
+		9B92282B3050A450006D97F5 /* ComfyNSScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92282A3050A44A006D97F5 /* ComfyNSScreen.swift */; };
 		9B965CE5302A8544003000F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 9B965CE4302A8544003000F0 /* Sparkle */; };
 		9B965D42302A87A0003000F0 /* UpdaterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */; };
 		9B965D44302A87AD003000F0 /* UpdateUserDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */; };
@@ -139,6 +144,11 @@
 		9B5C92C93035074200486390 /* ImageEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageEditView.swift; sourceTree = "<group>"; };
 		9B5C92D13035114500486390 /* ExportImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportImageView.swift; sourceTree = "<group>"; };
 		9B5C92D630351EC400486390 /* EditorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSettings.swift; sourceTree = "<group>"; };
+		9B9228223050748F006D97F5 /* NSScreen+rawValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSScreen+rawValue.swift"; sourceTree = "<group>"; };
+		9B92282430507A7C006D97F5 /* ShiftClickCapturable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShiftClickCapturable.swift; sourceTree = "<group>"; };
+		9B92282630509E99006D97F5 /* DragPreviewFormation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragPreviewFormation.swift; sourceTree = "<group>"; };
+		9B9228283050A38C006D97F5 /* TaskQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskQueue.swift; sourceTree = "<group>"; };
+		9B92282A3050A44A006D97F5 /* ComfyNSScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComfyNSScreen.swift; sourceTree = "<group>"; };
 		9B965CE6302A85EA003000F0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
 		9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateUserDriver.swift; sourceTree = "<group>"; };
@@ -211,6 +221,7 @@
 		9B4B700C302A7C92008101B9 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				9B9228223050748F006D97F5 /* NSScreen+rawValue.swift */,
 				9B4B7003302A7C92008101B9 /* Bundle.swift */,
 				9B4B7004302A7C92008101B9 /* Color+opposite.swift */,
 				9B4B7005302A7C92008101B9 /* FocusablePanel.swift */,
@@ -318,6 +329,8 @@
 		9B4B702D302A7C92008101B9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				9B92282A3050A44A006D97F5 /* ComfyNSScreen.swift */,
+				9B92282630509E99006D97F5 /* DragPreviewFormation.swift */,
 				9B4B7028302A7C92008101B9 /* DisplayIdentity.swift */,
 				9B4B7029302A7C92008101B9 /* DisplayImageStackModel.swift */,
 				9B4B702A302A7C92008101B9 /* ImageStackPadding.swift */,
@@ -330,6 +343,7 @@
 		9B4B7033302A7C92008101B9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				9B92282430507A7C006D97F5 /* ShiftClickCapturable.swift */,
 				9B4B7030302A7C92008101B9 /* ImageStackView.swift */,
 				9B4B702F302A7C92008101B9 /* ImageContainer.swift */,
 				9B4B7032302A7C92008101B9 /* UserImageView.swift */,
@@ -368,6 +382,7 @@
 		9B4B703C302A7C92008101B9 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				9B9228283050A38C006D97F5 /* TaskQueue.swift */,
 				9B4B7038302A7C92008101B9 /* AlertMaker.swift */,
 				9B4B7039302A7C92008101B9 /* CaptureInputInterceptor.swift */,
 				9B4B703A302A7C92008101B9 /* CursorHostingView.swift */,
@@ -517,17 +532,21 @@
 				9B4B704A302A7C92008101B9 /* FocusablePanel.swift in Sources */,
 				9B4B704B302A7C92008101B9 /* NSColor+toSIMD.swift in Sources */,
 				9B4B704C302A7C92008101B9 /* NSRect+axPosition.swift in Sources */,
+				9B9228293050A38C006D97F5 /* TaskQueue.swift in Sources */,
 				9B4B704D302A7C92008101B9 /* NSScreen+displayID.swift in Sources */,
 				9B4B704E302A7C92008101B9 /* ProcessInfo+isSwiftUIPreview.swift in Sources */,
 				9B4B704F302A7C92008101B9 /* View+destroyViewWindow.swift in Sources */,
 				9B5C92D23035114500486390 /* ExportImageView.swift in Sources */,
+				9B92282330507492006D97F5 /* NSScreen+rawValue.swift in Sources */,
 				9B4B7050302A7C92008101B9 /* View+if.swift in Sources */,
+				9B92282B3050A450006D97F5 /* ComfyNSScreen.swift in Sources */,
 				9B4B7051302A7C92008101B9 /* CaptureAreaModel.swift in Sources */,
 				9B4B7052302A7C92008101B9 /* CaptureResizeEdge.swift in Sources */,
 				9B4B7053302A7C92008101B9 /* OverlayContext.swift in Sources */,
 				9B4B7054302A7C92008101B9 /* ScrollingCaptureFailure.swift in Sources */,
 				9B4B7055302A7C92008101B9 /* ScrollingCaptureModels.swift in Sources */,
 				9B4B7056302A7C92008101B9 /* AXUIElement+ScrollingCapture.swift in Sources */,
+				9B92282530507A7C006D97F5 /* ShiftClickCapturable.swift in Sources */,
 				9B4B7057302A7C92008101B9 /* ScrollingCaptureDiscoverer.swift in Sources */,
 				9B965D44302A87AD003000F0 /* UpdateUserDriver.swift in Sources */,
 				9BF126B9302AD33200449787 /* ShortcutAction.swift in Sources */,
@@ -560,6 +579,7 @@
 				9B4B706D302A7C92008101B9 /* DisplayImageStack.swift in Sources */,
 				9B4B706E302A7C92008101B9 /* UserImageCoordinator.swift in Sources */,
 				9B4B706F302A7C92008101B9 /* AlertMaker.swift in Sources */,
+				9B92282730509E9E006D97F5 /* DragPreviewFormation.swift in Sources */,
 				9B4B7070302A7C92008101B9 /* CaptureInputInterceptor.swift in Sources */,
 				9B4B7071302A7C92008101B9 /* CursorHostingView.swift in Sources */,
 				9B4B7072302A7C92008101B9 /* ScreenHelpers.swift in Sources */,

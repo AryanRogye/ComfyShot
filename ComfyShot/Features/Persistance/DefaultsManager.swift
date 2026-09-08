@@ -24,7 +24,13 @@ final class DefaultsManager {
             Defaults[.selectionRectOpacity] = selectionRectOpacity
         }
     }
-    
+
+    var dragPreviewFormation: DragPreviewFormation = Defaults[.dragPreviewFormation] {
+        didSet {
+            Defaults[.dragPreviewFormation] = dragPreviewFormation
+        }
+    }
+
     var editorDefaultSelection: DefaultSelection
     
     init() {

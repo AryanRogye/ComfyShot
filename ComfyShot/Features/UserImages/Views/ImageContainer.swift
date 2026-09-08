@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Defaults
 
 struct ImageContainer: View {
     
@@ -15,6 +16,11 @@ struct ImageContainer: View {
     let layout: ImageStackOverflowLayout
     let onClose: (UserImage) -> Void
     let onEditImage: (UserImage) -> Void
+    let onShiftClick: (UserImage) -> Void
+
+    @Default(.dragPreviewFormation)
+    var dragPreviewFormation: DragPreviewFormation
+
     @State private var pendingGalleryCollapse: Task<Void, Never>?
     
     private var galleryAnimation: Animation {
@@ -34,7 +40,8 @@ struct ImageContainer: View {
                     layout: layout,
                     pendingGalleryCollapse: $pendingGalleryCollapse,
                     onClose: onClose,
-                    onEditImage: onEditImage
+                    onEditImage: onEditImage,
+                    onShiftClick: onShiftClick
                 )
             }
             
@@ -43,8 +50,11 @@ struct ImageContainer: View {
                     id: userImage.id,
                     image: userImage.image,
                     size: userImage.size,
+                    isShiftClicked: model.shiftClickedImages.contains(where: { $0.id == userImage.id}),
+                    dragURL: userImage.dragURL,
                     onClose: { onClose(userImage) },
-                    onEditImage: { onEditImage(userImage) }
+                    onEditImage: { onEditImage(userImage) },
+                    onShiftClick: { onShiftClick(userImage) }
                 )
                 .id(userImage.id)
             }
@@ -58,6 +68,48 @@ struct ImageContainer: View {
         }
         .onDisappear {
             pendingGalleryCollapse?.cancel()
+        }
+        .dragContainer(for: DraggableImage.self) { draggedIDs in
+            // The container can be dragging a selection that includes images in
+            // the overflow gallery. Build the payload from the source-of-truth
+            // collection instead of only the images currently visible in the
+            // stack.
+            let draggable: [DraggableImage] = model.images.compactMap { userImage in
+                guard draggedIDs.contains(userImage.id) else {
+                    return nil
+                }
+
+                let url = userImage.dragURL
+                guard let url else {
+                    return nil
+                }
+
+                return DraggableImage(
+                    id: userImage.id,
+                    url: url
+                )
+            }
+
+            return draggable
+        }
+        .dragPreviewsFormation(dragPreviewFormation.formation)
+        .dragContainerSelection(
+            model.shiftClickedImages.map(\.id)
+        )
+        .onDragSessionUpdated { session in
+            /// This checks to see if we did complete the drag, if we did
+            /// we unshift click the items
+            switch session.phase {
+            case .ended(let operation):
+                switch operation {
+                case .copy:
+                    model.unShiftClickedImages()
+                default:
+                    break
+                }
+            default:
+                break
+            }
         }
     }
 }

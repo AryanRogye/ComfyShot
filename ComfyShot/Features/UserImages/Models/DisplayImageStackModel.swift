@@ -11,11 +11,16 @@ import Observation
 @MainActor
 final class DisplayImageStackModel {
     var images: [UserImage] = []
+    var shiftClickedImages: [UserImage] = []
     var isOverflowGalleryPresented = false
 
     func add(_ image: UserImage) {
         isOverflowGalleryPresented = false
         images.append(image)
+    }
+
+    func unShiftClickedImages() {
+        shiftClickedImages.removeAll()
     }
 
     func remove(_ image: UserImage) {

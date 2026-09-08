@@ -25,6 +25,7 @@ struct ImageStackView: View {
     let placement: ImageStackPlacement
     let onClose: (UserImage) -> Void
     let onEditImage: (UserImage) -> Void
+    let onShiftClick: (UserImage) -> Void
 
     var images: [UserImage] {
         model.images
@@ -49,7 +50,8 @@ struct ImageStackView: View {
                 spacing: spacing,
                 layout: layout,
                 onClose: onClose,
-                onEditImage: onEditImage
+                onEditImage: onEditImage,
+                onShiftClick: onShiftClick
             )
             .frame(
                 width: contentWidth,

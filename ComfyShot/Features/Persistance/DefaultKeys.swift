@@ -31,4 +31,5 @@ extension Defaults.Keys {
     static let captureOverAppleScreenshotUI = Key<Bool>("captureOverAppleScreenshotUI", default: false)
     static let selectionRectOpacity = Key<CGFloat>("selection_rect_opacity", default: 0.9)
     static let editorDefaultSelection = Key<DefaultSelection>("editor_default_selection", default: .init())
+    static let dragPreviewFormation = Key<DragPreviewFormation>("dragPreviewFormation", default: .stack)
 }

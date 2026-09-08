@@ -56,7 +56,7 @@ final class DisplayImageStack {
     /// If the panel already exists, its SwiftUI content is refreshed.
     /// Otherwise a new floating panel is created and attached to the screen.
     func present(
-        on screen: NSScreen,
+        on screen: ComfyNSScreen,
         padding: ImageStackPadding,
         imageSpacing: CGFloat
     ) {
@@ -76,6 +76,16 @@ final class DisplayImageStack {
             onEditImage: { [weak self] image in
                 guard let self else { return }
                 self.onEditImage(image)
+            },
+            onShiftClick: { [weak self] image in
+                guard let self else { return }
+
+                /// Toggle Shift Click
+                if model.shiftClickedImages.contains(where: { $0.id == image.id }) {
+                    model.shiftClickedImages.removeAll(where: { $0.id == image.id })
+                } else {
+                    model.shiftClickedImages.append(image)
+                }
             }
         )
 
@@ -128,7 +138,7 @@ final class DisplayImageStack {
     /// Uses the visible frame instead of the full screen so screenshots
     /// never appear underneath the menu bar or Dock.
     private func placementForStack(
-        on screen: NSScreen,
+        on screen: ComfyNSScreen,
         padding: ImageStackPadding
     ) -> ImageStackPlacement {
         let screenFrame = screen.frame

@@ -8,7 +8,7 @@
 import AppKit
 
 extension NSScreen {
-    var displayID: CGDirectDisplayID? {
+    nonisolated var displayID: CGDirectDisplayID? {
         return deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID
     }
 }

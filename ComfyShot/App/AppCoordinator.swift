@@ -96,7 +96,7 @@ class AppCoordinator {
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 if let screenshot = await self.screenshotService.takeScreenshot() {
-                    self.userImageCoordinator.add(screenshot, to: screen)
+                    self.userImageCoordinator.add(screenshot, to: .init(screen: screen))
                 }
             }
         }
@@ -133,7 +133,7 @@ class AppCoordinator {
         
         captureAreaCoordinator.onCaptureImage = { [weak self] image, screen in
             guard let self else { return }
-            self.userImageCoordinator.add(image, to: screen)
+            self.userImageCoordinator.add(image, to: .init(screen: screen))
         }
         
         captureAreaCoordinator.onCaptureFinished = { [weak self] in

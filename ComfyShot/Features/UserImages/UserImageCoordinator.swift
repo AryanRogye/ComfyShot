@@ -18,7 +18,8 @@ final class UserImageCoordinator {
     private var stacksAreHidden = false
     
     private var screenParametersObserver: NSObjectProtocol?
-    
+    let taskQueue = TaskQueue()
+
     private let imageSpacing: CGFloat = 12
     
 
@@ -49,31 +50,39 @@ final class UserImageCoordinator {
     }
     
     /// function adds the image, and displays the panel onto the given screen
-    public func add(_ image: CGImage, to screen: NSScreen) {
-        guard let display = DisplayIdentity(screen: screen) else { return }
-        
-        // Use the minimum presentation container for unusually narrow images.
-        // UserImageView aspect-fits the pixels inside this size, so the image is
-        // never stretched while its hover target and controls remain usable.
+    /// we use ComfyNSScreen because this holds information for all we need
+    /// this is because ComfyNSScreen is Sendable
+    public func add(_ image: CGImage, to screen: ComfyNSScreen) {
+
+        guard let rawValue = screen.rawValue else { return }
+        let display = DisplayIdentity(rawValue: rawValue)
         let size = UserImageSizing.containerSizeForImage(image, on: screen)
         let stack = stackForDisplay(display, sized: screen.visibleFrame)
-        let userImage = UserImage(image: image, size: size)
-        stack.addImage(userImage)
-        stack.present(
-            on: screen,
-            padding: UserImageSizing.padding,
-            imageSpacing: imageSpacing
-        )
-        
-        if stacksAreHidden {
-            stack.hide()
+
+        taskQueue.enqueue { [weak self] in
+            guard let self else { return }
+            // Use the minimum presentation container for unusually narrow images.
+            // UserImageView aspect-fits the pixels inside this size, so the image is
+            // never stretched while its hover target and controls remain usable.
+            let userImage = await UserImage(image: image, size: size)
+            await stack.addImage(userImage)
+            await stack.present(
+                on: screen,
+                padding: UserImageSizing.padding,
+                imageSpacing: imageSpacing
+            )
+
+            if await stacksAreHidden {
+                await stack.hide()
+            }
         }
     }
     
     /// Closes all panels on a screen and resets its stack pointer.
     public func reset(for screen: NSScreen) {
-        guard let display = DisplayIdentity(screen: screen) else { return }
-        
+        guard let rawValue = screen.rawValue else { return }
+        let display = DisplayIdentity(rawValue: rawValue)
+
         stacksByDisplay[display]?.closePanel()
         stacksByDisplay[display] = nil
     }
@@ -124,7 +133,8 @@ final class UserImageCoordinator {
         
         for screen in NSScreen.screens {
             // create a displayID, if success add it to the activeDisplays
-            guard let display = DisplayIdentity(screen: screen) else { continue }
+            guard let rawValue = screen.rawValue else { continue }
+            let display = DisplayIdentity(rawValue: rawValue)
             activeDisplays.insert(display)
             
             // see if we have a currentStack for the display, and not empty
@@ -132,10 +142,12 @@ final class UserImageCoordinator {
             guard let stack = stacksByDisplay[display], !stack.model.images.isEmpty else {
                 continue
             }
-            
+
+            let comfyScreen = ComfyNSScreen(screen: screen)
+
             // if stack for display is not empty, we just replace it quickly
             stack.present(
-                on: screen,
+                on: comfyScreen,
                 padding: UserImageSizing.padding,
                 imageSpacing: imageSpacing
             )
@@ -172,7 +184,7 @@ enum UserImageSizing {
     private static let minContainerHeight: CGFloat = 160
     
     
-    public static func sizeForImage(_ image: CGImage, on screen: NSScreen) -> NSSize {
+    public static func sizeForImage(_ image: CGImage, on screen: ComfyNSScreen) -> NSSize {
         let imageWidth = CGFloat(image.width)
         let imageHeight = CGFloat(image.height)
         let availableHeight = max(1, screen.visibleFrame.height - padding.topPadding * 2)
@@ -189,7 +201,7 @@ enum UserImageSizing {
     
     /// Container size: the box the image sits in, which enforces the mins.
     /// The image gets centered inside this — it does NOT get scaled to fill it.
-    public static func containerSizeForImage(_ image: CGImage, on screen: NSScreen) -> NSSize {
+    public static func containerSizeForImage(_ image: CGImage, on screen: ComfyNSScreen) -> NSSize {
         let imageSize = sizeForImage(image, on: screen)
         return NSSize(
             width: max(minContainerWidth, imageSize.width),

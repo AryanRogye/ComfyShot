@@ -23,15 +23,19 @@ struct UserImageView: View {
     let id: UUID
     let image: CGImage
     let size: NSSize
+    let isShiftClicked: Bool
+    let dragURL: URL?
     var shadowStyle: ShadowStyle = .regular
     let onClose: () -> Void
     let onEditImage: () -> Void
+    let onShiftClick: () -> Void
 
     @State private var hovering: Bool = false
-    @State private var dragURL: URL?
 
     var body: some View {
         ZStack {
+            ShiftClickCapturable(didShiftClick: onShiftClick)
+
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 .fill(.black.opacity(0.12))
 
@@ -45,6 +49,23 @@ struct UserImageView: View {
                 .clipShape(
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 )
+                .draggable(containerItemID: id)
+
+            if isShiftClicked {
+                Color.black.opacity(0.5)
+                    .allowsHitTesting(false)
+                ZStack {
+                    Circle()
+                        .fill(.green)
+                        .frame(width: 40, height: 40)
+                        .overlay {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 22, weight: .black, design: .default))
+                                .foregroundStyle(.white)
+                        }
+                }
+                .allowsHitTesting(false)
+            }
         }
         .frame(
             width: size.width,
@@ -69,17 +90,24 @@ struct UserImageView: View {
                 self.hovering = hovering
             }
         }
-        .task(id: id) {
-            dragURL = await UserImageExportStore.shared.dragURL(for: id, image: image)
-        }
-        .draggable(dragURL ?? URL(fileURLWithPath: "/dev/null")) {
-            // The default preview snapshots the glass controls and shadows above.
-            // Rendering that snapshot can crash in RenderBox.apply_custom_blend
-            // when AppKit creates the drag image. Keep this preview bitmap-only.
-            Image(decorative: image, scale: 1)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size.width, height: size.height)
+        .animation(.spring, value: isShiftClicked)
+    }
+}
+
+struct DraggableImage: Identifiable, Transferable {
+    let id: UUID
+    let url: URL
+
+    static var transferRepresentation: some TransferRepresentation {
+        // Keep the URL representation used by URL-based drop targets (the old
+        // single-image drag exported URL directly), while also keeping a file
+        // representation for Finder and image-aware targets.
+        ProxyRepresentation(exporting: \.url)
+        FileRepresentation(exportedContentType: .png) { item in
+            SentTransferredFile(
+                item.url,
+                allowAccessingOriginalFile: true
+            )
         }
     }
 }
@@ -161,44 +189,5 @@ private struct UserImageShadowModifier: ViewModifier {
             content
                 .shadow(color: .black.opacity(0.34), radius: 6, x: 0, y: 3)
         }
-    }
-}
-
-private actor UserImageExportStore {
-    static let shared = UserImageExportStore()
-
-    private var urlsByImageID: [UUID: URL] = [:]
-
-    func dragURL(for id: UUID, image: CGImage) -> URL? {
-        if let URL = urlsByImageID[id] {
-            return URL
-        }
-
-        let URL = try? writePNGTempFile(from: image)
-        urlsByImageID[id] = URL
-        return URL
-    }
-
-    private func writePNGTempFile(from cgImage: CGImage) throws -> URL {
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-            .appendingPathExtension("png")
-
-        guard let destination = CGImageDestinationCreateWithURL(
-            url as CFURL,
-            UTType.png.identifier as CFString,
-            1,
-            nil
-        ) else {
-            throw NSError(domain: "ImageExport", code: 1)
-        }
-
-        CGImageDestinationAddImage(destination, cgImage, nil)
-
-        guard CGImageDestinationFinalize(destination) else {
-            throw NSError(domain: "ImageExport", code: 2)
-        }
-
-        return url
     }
 }

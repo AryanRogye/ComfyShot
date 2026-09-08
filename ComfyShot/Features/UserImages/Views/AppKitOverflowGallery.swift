@@ -15,12 +15,14 @@ struct AppKitOverflowGallery: NSViewRepresentable {
     let verticalOffset: (Int) -> CGFloat
     let onClose: (UserImage) -> Void
     let onEditImage: (UserImage) -> Void
+    let onShiftClick: (UserImage) -> Void
+    let isShiftClicked: (UserImage) -> Bool
 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
     }
 
-    func makeNSView(context: Context) -> NSScrollView {
+    func makeNSView(context: Context) -> NoScrollerScrollView {
         let layout = NSCollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumInteritemSpacing = spacing
@@ -38,11 +40,13 @@ struct AppKitOverflowGallery: NSViewRepresentable {
             forItemWithIdentifier: OverflowGalleryItem.reuseIdentifier
         )
 
-        let scrollView = NSScrollView()
+        let scrollView = NoScrollerScrollView()
         scrollView.drawsBackground = false
         scrollView.documentView = collectionView
-        scrollView.hasHorizontalScroller = true
+        scrollView.hasHorizontalScroller = false
         scrollView.hasVerticalScroller = false
+        scrollView.horizontalScroller = nil
+        scrollView.verticalScroller = nil
         scrollView.autohidesScrollers = true
         scrollView.scrollerStyle = .overlay
         scrollView.horizontalScrollElasticity = .automatic
@@ -56,10 +60,11 @@ struct AppKitOverflowGallery: NSViewRepresentable {
         return scrollView
     }
 
-    func updateNSView(_ scrollView: NSScrollView, context: Context) {
+    func updateNSView(_ scrollView: NoScrollerScrollView, context: Context) {
         let previousIDs = context.coordinator.images.map(\.id)
         let currentIDs = images.map(\.id)
         let contentChanged = previousIDs != currentIDs
+
         context.coordinator.reload(
             with: self,
             reloadData: contentChanged,
@@ -71,10 +76,12 @@ struct AppKitOverflowGallery: NSViewRepresentable {
     final class Coordinator: NSObject, NSCollectionViewDataSource, NSCollectionViewDelegateFlowLayout {
         fileprivate var images: [UserImage]
         fileprivate var thumbnailSize: (UserImage) -> NSSize
+        fileprivate var isShiftClicked: (UserImage) -> Bool
         fileprivate var rotation: (Int) -> Double
         fileprivate var verticalOffset: (Int) -> CGFloat
         fileprivate var onClose: (UserImage) -> Void
         fileprivate var onEditImage: (UserImage) -> Void
+        fileprivate var onShiftClick: (UserImage) -> Void
 
         fileprivate weak var collectionView: NSCollectionView?
         fileprivate weak var scrollView: NSScrollView?
@@ -86,6 +93,8 @@ struct AppKitOverflowGallery: NSViewRepresentable {
             verticalOffset = parent.verticalOffset
             onClose = parent.onClose
             onEditImage = parent.onEditImage
+            onShiftClick = parent.onShiftClick
+            isShiftClicked = parent.isShiftClicked
         }
 
         fileprivate func reload(
@@ -136,6 +145,7 @@ struct AppKitOverflowGallery: NSViewRepresentable {
                 verticalOffset: verticalOffset(indexPath.item),
                 position: indexPath.item,
                 count: images.count,
+                isShiftClicked: isShiftClicked(image),
                 onClose: { [weak self] image in
                     guard let self else { return }
                     self.onClose(image)
@@ -143,6 +153,10 @@ struct AppKitOverflowGallery: NSViewRepresentable {
                 onEditImage: { [weak self] image in
                     guard let self else { return }
                     self.onEditImage(image)
+                },
+                onShiftClick: { [weak self] image in
+                    guard let self else { return }
+                    self.onShiftClick(image)
                 }
             )
             return item
@@ -165,6 +179,29 @@ struct AppKitOverflowGallery: NSViewRepresentable {
             scrollView.contentView.scroll(to: NSPoint(x: trailingX, y: 0))
             scrollView.reflectScrolledClipView(scrollView.contentView)
         }
+    }
+}
+
+final class NoScrollerScrollView: NSScrollView {
+
+    override var hasHorizontalScroller: Bool {
+        get { false }
+        set { super.hasHorizontalScroller = false }
+    }
+
+    override var hasVerticalScroller: Bool {
+        get { false }
+        set { super.hasVerticalScroller = false }
+    }
+
+    override var horizontalScroller: NSScroller? {
+        get { nil }
+        set { super.horizontalScroller = nil }
+    }
+
+    override var verticalScroller: NSScroller? {
+        get { nil }
+        set { super.verticalScroller = nil }
     }
 }
 
@@ -194,17 +231,22 @@ private final class OverflowGalleryItem: NSCollectionViewItem {
         verticalOffset: CGFloat,
         position: Int,
         count: Int,
+        isShiftClicked: Bool,
         onClose: @escaping (UserImage) -> Void,
-        onEditImage: @escaping (UserImage) -> Void
+        onEditImage: @escaping (UserImage) -> Void,
+        onShiftClick: @escaping (UserImage) -> Void
     ) {
         hostingView?.rootView = AnyView(
             UserImageView(
                 id: userImage.id,
                 image: userImage.image,
                 size: size,
+                isShiftClicked: isShiftClicked,
+                dragURL: userImage.dragURL,
                 shadowStyle: .compact,
                 onClose: { onClose(userImage) },
-                onEditImage: { onEditImage(userImage) }
+                onEditImage: { onEditImage(userImage) },
+                onShiftClick: { onShiftClick(userImage) }
             )
             .rotationEffect(.degrees(rotation))
             .offset(y: verticalOffset)
