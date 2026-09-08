@@ -23,6 +23,8 @@ ComfyShot lives in your menu bar and keeps screen capture close at hand. Capture
 - Scrolling capture for content that extends beyond the viewport
 - Per-display screenshot stacks with an overflow gallery
 - Drag-and-drop PNGs directly into other apps
+- Shift-click to select multiple screenshots and drag them together
+- Configurable multi-image drag previews: Default, None, Pile, List, or Stack
 - Built-in image editor with drawing tools, undo, redo, and PNG export
 - Customizable global keyboard shortcuts
 - Configurable selection overlay and editor defaults
@@ -55,7 +57,9 @@ Choose a capture mode from the menu-bar icon or use one of the default shortcuts
 
 Shortcuts can be changed under **ComfyShot → Settings → Shortcuts**.
 
-After taking a screenshot, hover over it to reveal its controls. You can open it as a PNG, drag it into another app, edit it, or remove it from the stack.
+After taking a screenshot, hover over it to reveal its controls. You can open it as a PNG, draw and annotate it in the built-in editor, drag it into another app, or remove it from the stack. Hold **Shift** and click screenshots to select multiple images, then drag the selection into another app. Selected screenshots can also be cleared from the menu-bar menu.
+
+To choose how multiple screenshots appear while dragging, open **ComfyShot → Settings → General → Drag Preview Formation**.
 
 ## Building from source
 
