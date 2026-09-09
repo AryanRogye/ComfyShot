@@ -69,36 +69,42 @@ final class CaptureAreaCoordinator {
         
         guard let keyOverlay = overlayForMouse() ?? overlayContexts.map(\.panel).first else { return }
 
+        /// Install the HID event tap before presenting any panel. Consuming pointer
+        /// events at that level lets the cursor keep moving while the Dock or an
+        /// open menu remains in its last delivered hover/tracking state.
+        let inputInterceptorStarted = appleScreenshotInputBridge.start(
+            contexts: overlayContexts,
+            onCancel: { [weak self] in
+                self?.hide()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) { [weak self] in
+                    self?.onCaptureFinished?()
+                }
+            }
+        )
+
         for overlayScreen in overlayContexts.map(\.panel) {
-            if overlayScreen === keyOverlay {
-                overlayScreen.orderFrontRegardless()
+            overlayScreen.orderFrontRegardless()
+            overlayScreen.ignoresMouseEvents = inputInterceptorStarted
+
+            if !inputInterceptorStarted && overlayScreen === keyOverlay {
                 overlayScreen.makeKey()
                 overlayScreen.makeFirstResponder(overlayScreen.contentView)
-            } else {
-                overlayScreen.orderFrontRegardless()
             }
-            overlayScreen.ignoresMouseEvents = false
-            applyCrosshairCursor(to: overlayScreen)
+            if !inputInterceptorStarted {
+                applyCrosshairCursor(to: overlayScreen)
+            }
         }
-        
-        if defaultsManager.captureOverAppleScreenshotUI {
-            appleScreenshotInputBridge.startIfNeeded(
-                contexts: overlayContexts,
-                onCancel: { [weak self] in
-                    self?.hide()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) { [weak self] in
-                        self?.onCaptureFinished?()
-                    }
-                }
-            )
+
+        if inputInterceptorStarted {
+            /// Panel presentation can make AppKit install one of its cursor rects.
+            /// Hide the hardware cursor only after every panel has been ordered in.
+            appleScreenshotInputBridge.hideSystemCursor()
         }
     }
     
     public func hide() {
         isStartingScrollCapture = false
-        if defaultsManager.captureOverAppleScreenshotUI {
-            appleScreenshotInputBridge.stop()
-        }
+        appleScreenshotInputBridge.stop()
         
         guard !overlayContexts.isEmpty else {
             print("Cant Hide, Overlay is nil")
@@ -176,9 +182,7 @@ extension CaptureAreaCoordinator {
     private func closeAndResetOverlayPanels() {
         guard !overlayContexts.isEmpty else { return }
 
-        if defaultsManager.captureOverAppleScreenshotUI {
-            appleScreenshotInputBridge.stop()
-        }
+        appleScreenshotInputBridge.stop()
         overlayContexts.map(\.panel).forEach {
             $0.orderOut(nil)
             $0.close()
@@ -246,7 +250,8 @@ extension CaptureAreaCoordinator {
                     guard let self else { return }
                     if let image = await self.screenshot.takeScreenshot(
                         of: captureTarget.screen,
-                        croppingTo: captureTarget.rect
+                        croppingTo: captureTarget.rect,
+                        options: ScreenshotCaptureOptions(showsCursor: false)
                     ) {
                         self.onCaptureImage?(image, captureTarget.screen)
                     }

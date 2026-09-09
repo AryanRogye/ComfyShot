@@ -69,6 +69,10 @@
 		9B92282730509E9E006D97F5 /* DragPreviewFormation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92282630509E99006D97F5 /* DragPreviewFormation.swift */; };
 		9B9228293050A38C006D97F5 /* TaskQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9228283050A38C006D97F5 /* TaskQueue.swift */; };
 		9B92282B3050A450006D97F5 /* ComfyNSScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92282A3050A44A006D97F5 /* ComfyNSScreen.swift */; };
+		9B92296330521DD2006D97F5 /* CGSPrivate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92296230521DCE006D97F5 /* CGSPrivate.swift */; };
+		9B92296530521DF2006D97F5 /* CGSTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92296430521DF0006D97F5 /* CGSTypes.swift */; };
+		9B922969305220C8006D97F5 /* CGPoint+quartzPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B922968305220C5006D97F5 /* CGPoint+quartzPoint.swift */; };
+		9B92296B30522136006D97F5 /* SystemCursorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92296A30522136006D97F5 /* SystemCursorController.swift */; };
 		9B965CE5302A8544003000F0 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 9B965CE4302A8544003000F0 /* Sparkle */; };
 		9B965D42302A87A0003000F0 /* UpdaterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */; };
 		9B965D44302A87AD003000F0 /* UpdateUserDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */; };
@@ -149,6 +153,10 @@
 		9B92282630509E99006D97F5 /* DragPreviewFormation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragPreviewFormation.swift; sourceTree = "<group>"; };
 		9B9228283050A38C006D97F5 /* TaskQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskQueue.swift; sourceTree = "<group>"; };
 		9B92282A3050A44A006D97F5 /* ComfyNSScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComfyNSScreen.swift; sourceTree = "<group>"; };
+		9B92296230521DCE006D97F5 /* CGSPrivate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSPrivate.swift; sourceTree = "<group>"; };
+		9B92296430521DF0006D97F5 /* CGSTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSTypes.swift; sourceTree = "<group>"; };
+		9B922968305220C5006D97F5 /* CGPoint+quartzPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+quartzPoint.swift"; sourceTree = "<group>"; };
+		9B92296A30522136006D97F5 /* SystemCursorController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemCursorController.swift; sourceTree = "<group>"; };
 		9B965CE6302A85EA003000F0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9B965D41302A87A0003000F0 /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
 		9B965D43302A87AD003000F0 /* UpdateUserDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateUserDriver.swift; sourceTree = "<group>"; };
@@ -221,6 +229,7 @@
 		9B4B700C302A7C92008101B9 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				9B922968305220C5006D97F5 /* CGPoint+quartzPoint.swift */,
 				9B9228223050748F006D97F5 /* NSScreen+rawValue.swift */,
 				9B4B7003302A7C92008101B9 /* Bundle.swift */,
 				9B4B7004302A7C92008101B9 /* Color+opposite.swift */,
@@ -270,10 +279,10 @@
 		9B4B701D302A7C92008101B9 /* CaptureArea */ = {
 			isa = PBXGroup;
 			children = (
+				9B92296C30522439006D97F5 /* Input */,
 				9B4B7012302A7C92008101B9 /* Models */,
 				9B4B7017302A7C92008101B9 /* Scrolling */,
 				9B4B701A302A7C92008101B9 /* Views */,
-				9B4B701B302A7C92008101B9 /* AppleScreenshotInputBridge.swift */,
 				9B4B701C302A7C92008101B9 /* CaptureAreaCoordinator.swift */,
 			);
 			path = CaptureArea;
@@ -369,6 +378,7 @@
 		9B4B7037302A7C92008101B9 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				9B92296130521DC4006D97F5 /* CGS */,
 				9B4B701D302A7C92008101B9 /* CaptureArea */,
 				9B4B7021302A7C92008101B9 /* Common */,
 				9B4B7024302A7C92008101B9 /* Persistance */,
@@ -384,7 +394,6 @@
 			children = (
 				9B9228283050A38C006D97F5 /* TaskQueue.swift */,
 				9B4B7038302A7C92008101B9 /* AlertMaker.swift */,
-				9B4B7039302A7C92008101B9 /* CaptureInputInterceptor.swift */,
 				9B4B703A302A7C92008101B9 /* CursorHostingView.swift */,
 				9B4B703B302A7C92008101B9 /* ScreenHelpers.swift */,
 			);
@@ -403,6 +412,25 @@
 				9B4B703D302A7C92008101B9 /* Assets.xcassets */,
 			);
 			path = ComfyShot;
+			sourceTree = "<group>";
+		};
+		9B92296130521DC4006D97F5 /* CGS */ = {
+			isa = PBXGroup;
+			children = (
+				9B92296430521DF0006D97F5 /* CGSTypes.swift */,
+				9B92296230521DCE006D97F5 /* CGSPrivate.swift */,
+			);
+			path = CGS;
+			sourceTree = "<group>";
+		};
+		9B92296C30522439006D97F5 /* Input */ = {
+			isa = PBXGroup;
+			children = (
+				9B4B701B302A7C92008101B9 /* AppleScreenshotInputBridge.swift */,
+				9B4B7039302A7C92008101B9 /* CaptureInputInterceptor.swift */,
+				9B92296A30522136006D97F5 /* SystemCursorController.swift */,
+			);
+			path = Input;
 			sourceTree = "<group>";
 		};
 		9B965D40302A879B003000F0 /* Updates */ = {
@@ -530,15 +558,18 @@
 				9B4B7048302A7C92008101B9 /* Bundle.swift in Sources */,
 				9B4B7049302A7C92008101B9 /* Color+opposite.swift in Sources */,
 				9B4B704A302A7C92008101B9 /* FocusablePanel.swift in Sources */,
+				9B922969305220C8006D97F5 /* CGPoint+quartzPoint.swift in Sources */,
 				9B4B704B302A7C92008101B9 /* NSColor+toSIMD.swift in Sources */,
 				9B4B704C302A7C92008101B9 /* NSRect+axPosition.swift in Sources */,
 				9B9228293050A38C006D97F5 /* TaskQueue.swift in Sources */,
 				9B4B704D302A7C92008101B9 /* NSScreen+displayID.swift in Sources */,
 				9B4B704E302A7C92008101B9 /* ProcessInfo+isSwiftUIPreview.swift in Sources */,
 				9B4B704F302A7C92008101B9 /* View+destroyViewWindow.swift in Sources */,
+				9B92296B30522136006D97F5 /* SystemCursorController.swift in Sources */,
 				9B5C92D23035114500486390 /* ExportImageView.swift in Sources */,
 				9B92282330507492006D97F5 /* NSScreen+rawValue.swift in Sources */,
 				9B4B7050302A7C92008101B9 /* View+if.swift in Sources */,
+				9B92296530521DF2006D97F5 /* CGSTypes.swift in Sources */,
 				9B92282B3050A450006D97F5 /* ComfyNSScreen.swift in Sources */,
 				9B4B7051302A7C92008101B9 /* CaptureAreaModel.swift in Sources */,
 				9B4B7052302A7C92008101B9 /* CaptureResizeEdge.swift in Sources */,
@@ -547,6 +578,7 @@
 				9B4B7055302A7C92008101B9 /* ScrollingCaptureModels.swift in Sources */,
 				9B4B7056302A7C92008101B9 /* AXUIElement+ScrollingCapture.swift in Sources */,
 				9B92282530507A7C006D97F5 /* ShiftClickCapturable.swift in Sources */,
+				9B92296330521DD2006D97F5 /* CGSPrivate.swift in Sources */,
 				9B4B7057302A7C92008101B9 /* ScrollingCaptureDiscoverer.swift in Sources */,
 				9B965D44302A87AD003000F0 /* UpdateUserDriver.swift in Sources */,
 				9BF126B9302AD33200449787 /* ShortcutAction.swift in Sources */,

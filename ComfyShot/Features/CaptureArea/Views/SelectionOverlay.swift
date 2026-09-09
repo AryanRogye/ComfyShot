@@ -5,6 +5,7 @@
 //  Created by Aryan Rogye on 6/30/26.
 //
 
+import AppKit
 import SwiftUI
 
 struct SelectionOverlay: View {
@@ -27,11 +28,31 @@ struct SelectionOverlay: View {
                 topRow
                 Spacer()
             }
+
+            virtualCursor
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .gesture(dragGesture)
         .onExitCommand(perform: model.exit)
+    }
+
+    @ViewBuilder
+    private var virtualCursor: some View {
+        if let location = model.virtualCursorLocation {
+            let cursor = NSCursor.crosshair
+            let imageSize = cursor.image.size
+
+            /// Position the cursor by its hotspot rather than its image center so
+            /// clicks and selection edges line up with the visible crosshair.
+            Image(nsImage: cursor.image)
+                .position(
+                    x: location.x + imageSize.width / 2 - cursor.hotSpot.x,
+                    y: location.y + imageSize.height / 2 - cursor.hotSpot.y
+                )
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
     }
     
     private var dimmedBackground: some View {
