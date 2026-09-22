@@ -33,6 +33,7 @@ struct SelectionRect: View {
             SelectionShape()
                 .contentShape(Rectangle())
                 .onHover { hovering in
+                    guard !CaptureCursorOverride.isIntercepting else { return }
                     isHoveringSelection = hovering
                     
                     if hovering {
@@ -98,6 +99,7 @@ struct SelectionRect: View {
             .fill(.clear)
             .contentShape(Rectangle())
             .onHover { hovering in
+                guard !CaptureCursorOverride.isIntercepting else { return }
                 if hovering {
                     hoveredResizeEdge = edge
                     setResizeCursor(for: edge)
@@ -114,10 +116,12 @@ struct SelectionRect: View {
     private var moveGesture: some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .global)
             .onChanged { value in
+                guard !CaptureCursorOverride.isIntercepting else { return }
                 CaptureCursorOverride.setClosedHand()
                 model.moveSelection(translation: value.translation)
             }
             .onEnded { _ in
+                guard !CaptureCursorOverride.isIntercepting else { return }
                 if isHoveringSelection {
                     CaptureCursorOverride.setOpenHand()
                 } else {
@@ -131,6 +135,7 @@ struct SelectionRect: View {
     private func resizeGesture(for edge: CaptureResizeEdge) -> some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .global)
             .onChanged { value in
+                guard !CaptureCursorOverride.isIntercepting else { return }
                 setResizeCursor(for: edge)
                 model.resizeSelection(
                     edge: edge,
@@ -138,6 +143,7 @@ struct SelectionRect: View {
                 )
             }
             .onEnded { _ in
+                guard !CaptureCursorOverride.isIntercepting else { return }
                 model.endResize()
 
                 if hoveredResizeEdge == edge {

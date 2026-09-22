@@ -18,7 +18,7 @@ final class CaptureAreaCoordinator {
     public var onCaptureImage: ((CGImage, NSScreen) -> Void)?
     public var onCaptureFinished: (() -> Void)?
 
-    private lazy var appleScreenshotInputBridge = AppleScreenshotInputBridge()
+    private lazy var appleScreenshotInputBridge = ComfyShotInputBridge()
     private lazy var scrollingCaptureService = ScrollingCaptureService(
         screenshot: screenshot
     )
@@ -88,7 +88,9 @@ final class CaptureAreaCoordinator {
 
         for overlayScreen in overlayContexts.map(\.panel) {
             overlayScreen.orderFrontRegardless()
-            overlayScreen.ignoresMouseEvents = inputInterceptorStarted
+            // Keep cursor hit testing on the topmost capture panel. The event
+            // tap still consumes input before the panel or underlying app sees it.
+            overlayScreen.ignoresMouseEvents = false
 
             if !inputInterceptorStarted && overlayScreen === keyOverlay {
                 overlayScreen.makeKey()

@@ -13,6 +13,10 @@ import SwiftUI
 enum CaptureCursorOverride {
     private static var cursor: NSCursor?
     private static var interceptedCursor: NSCursor?
+    private static let verticalResizeCursor = NSCursor.frameResize(position: .top, directions: .all)
+    private static let horizontalResizeCursor = NSCursor.frameResize(position: .left, directions: .all)
+    private static let diagonalDownResizeCursor = NSCursor.frameResize(position: .topLeft, directions: .all)
+    private static let diagonalUpResizeCursor = NSCursor.frameResize(position: .topRight, directions: .all)
     
     static func setResizeUpDown() {
         set(resizeCursor(for: .top))
@@ -46,6 +50,10 @@ enum CaptureCursorOverride {
         interceptedCursor ?? cursor ?? defaultCursor
     }
 
+    static var isIntercepting: Bool {
+        interceptedCursor != nil
+    }
+
     /// Keep the cursor rect and the intercepted input path on the same shape.
     static func setInterceptedCursor(_ newCursor: NSCursor) {
         interceptedCursor = newCursor
@@ -61,18 +69,22 @@ enum CaptureCursorOverride {
     static func resizeCursor(for edge: CaptureResizeEdge) -> NSCursor {
         switch edge {
         case .top, .bottom:
-            .frameResize(position: .top, directions: .all)
+            verticalResizeCursor
         case .leading, .trailing:
-            .frameResize(position: .left, directions: .all)
+            horizontalResizeCursor
         case .topLeading, .bottomTrailing:
-            .frameResize(position: .topLeft, directions: .all)
+            diagonalDownResizeCursor
         case .topTrailing, .bottomLeading:
-            .frameResize(position: .topRight, directions: .all)
+            diagonalUpResizeCursor
         }
     }
     
     private static func set(_ newCursor: NSCursor?) {
         cursor = newCursor
+        // The input bridge owns the cursor while the event tap is active.
+        // Hover callbacks can still arrive at selection boundaries; letting
+        // them call `set()` here would set the same cursor twice per crossing.
+        guard interceptedCursor == nil else { return }
         current(default: .crosshair).set()
     }
 }
@@ -94,23 +106,28 @@ final class CursorHostingView<Content: View>: NSHostingView<Content> {
     }
     
     override func cursorUpdate(with event: NSEvent) {
-        currentCursor.set()
+        if !CaptureCursorOverride.isIntercepting {
+            currentCursor.set()
+        }
     }
     
     override func mouseMoved(with event: NSEvent) {
-        currentCursor.set()
+        if !CaptureCursorOverride.isIntercepting {
+            currentCursor.set()
+        }
         super.mouseMoved(with: event)
     }
     
     override func mouseDragged(with event: NSEvent) {
-        currentCursor.set()
+        if !CaptureCursorOverride.isIntercepting {
+            currentCursor.set()
+        }
         super.mouseDragged(with: event)
     }
     
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         window?.acceptsMouseMovedEvents = true
-        window?.invalidateCursorRects(for: self)
         currentCursor.set()
     }
     
@@ -130,8 +147,4 @@ final class CursorHostingView<Content: View>: NSHostingView<Content> {
         trackingArea = area
     }
     
-    override func setFrameSize(_ newSize: NSSize) {
-        super.setFrameSize(newSize)
-        window?.invalidateCursorRects(for: self)
-    }
 }

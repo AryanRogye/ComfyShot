@@ -36,7 +36,7 @@
 		9B4B7059302A7C92008101B9 /* ScrollingCaptureStitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B7016302A7C92008101B9 /* ScrollingCaptureStitcher.swift */; };
 		9B4B705A302A7C92008101B9 /* SelectionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B7018302A7C92008101B9 /* SelectionOverlay.swift */; };
 		9B4B705B302A7C92008101B9 /* SelectionRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B7019302A7C92008101B9 /* SelectionRect.swift */; };
-		9B4B705C302A7C92008101B9 /* AppleScreenshotInputBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B701B302A7C92008101B9 /* AppleScreenshotInputBridge.swift */; };
+		9B4B705C302A7C92008101B9 /* ComfyShotInputBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B701B302A7C92008101B9 /* ComfyShotInputBridge.swift */; };
 		9B4B705D302A7C92008101B9 /* CaptureAreaCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B701C302A7C92008101B9 /* CaptureAreaCoordinator.swift */; };
 		9B4B705E302A7C92008101B9 /* PermissionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B701E302A7C92008101B9 /* PermissionService.swift */; };
 		9B4B705F302A7C92008101B9 /* PermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4B701F302A7C92008101B9 /* PermissionView.swift */; };
@@ -65,6 +65,7 @@
 		9B5C92D730351EC500486390 /* EditorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5C92D630351EC400486390 /* EditorSettings.swift */; };
 		9B5C94CE30354CCF00486390 /* DrawKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9B5C94CD30354CCF00486390 /* DrawKit */; };
 		9B8B4CEB3063137000496DFE /* ScrollingCaptureEscapeMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8B4CEA3063137000496DFE /* ScrollingCaptureEscapeMonitor.swift */; };
+		9B8B4CED30631F9600496DFE /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9B8B4CEC30631F9600496DFE /* README.md */; };
 		9B92282330507492006D97F5 /* NSScreen+rawValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9228223050748F006D97F5 /* NSScreen+rawValue.swift */; };
 		9B92282530507A7C006D97F5 /* ShiftClickCapturable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92282430507A7C006D97F5 /* ShiftClickCapturable.swift */; };
 		9B92282730509E9E006D97F5 /* DragPreviewFormation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92282630509E99006D97F5 /* DragPreviewFormation.swift */; };
@@ -122,7 +123,7 @@
 		9B4B7016302A7C92008101B9 /* ScrollingCaptureStitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingCaptureStitcher.swift; sourceTree = "<group>"; };
 		9B4B7018302A7C92008101B9 /* SelectionOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionOverlay.swift; sourceTree = "<group>"; };
 		9B4B7019302A7C92008101B9 /* SelectionRect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionRect.swift; sourceTree = "<group>"; };
-		9B4B701B302A7C92008101B9 /* AppleScreenshotInputBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleScreenshotInputBridge.swift; sourceTree = "<group>"; };
+		9B4B701B302A7C92008101B9 /* ComfyShotInputBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComfyShotInputBridge.swift; sourceTree = "<group>"; };
 		9B4B701C302A7C92008101B9 /* CaptureAreaCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureAreaCoordinator.swift; sourceTree = "<group>"; };
 		9B4B701E302A7C92008101B9 /* PermissionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionService.swift; sourceTree = "<group>"; };
 		9B4B701F302A7C92008101B9 /* PermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionView.swift; sourceTree = "<group>"; };
@@ -150,6 +151,7 @@
 		9B5C92D13035114500486390 /* ExportImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportImageView.swift; sourceTree = "<group>"; };
 		9B5C92D630351EC400486390 /* EditorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSettings.swift; sourceTree = "<group>"; };
 		9B8B4CEA3063137000496DFE /* ScrollingCaptureEscapeMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingCaptureEscapeMonitor.swift; sourceTree = "<group>"; };
+		9B8B4CEC30631F9600496DFE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9B9228223050748F006D97F5 /* NSScreen+rawValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSScreen+rawValue.swift"; sourceTree = "<group>"; };
 		9B92282430507A7C006D97F5 /* ShiftClickCapturable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShiftClickCapturable.swift; sourceTree = "<group>"; };
 		9B92282630509E99006D97F5 /* DragPreviewFormation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragPreviewFormation.swift; sourceTree = "<group>"; };
@@ -429,7 +431,8 @@
 		9B92296C30522439006D97F5 /* Input */ = {
 			isa = PBXGroup;
 			children = (
-				9B4B701B302A7C92008101B9 /* AppleScreenshotInputBridge.swift */,
+				9B8B4CEC30631F9600496DFE /* README.md */,
+				9B4B701B302A7C92008101B9 /* ComfyShotInputBridge.swift */,
 				9B4B7039302A7C92008101B9 /* CaptureInputInterceptor.swift */,
 				9B92296A30522136006D97F5 /* SystemCursorController.swift */,
 			);
@@ -537,6 +540,7 @@
 		000000000000000140000000 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
+				9B8B4CED30631F9600496DFE /* README.md in Resources */,
 				9B4B703F302A7C92008101B9 /* Assets.xcassets in Resources */,
 				9BF12645302ABA1800449787 /* ComfyShot.icon in Resources */,
 			);
@@ -589,7 +593,7 @@
 				9B4B7059302A7C92008101B9 /* ScrollingCaptureStitcher.swift in Sources */,
 				9B4B705A302A7C92008101B9 /* SelectionOverlay.swift in Sources */,
 				9B4B705B302A7C92008101B9 /* SelectionRect.swift in Sources */,
-				9B4B705C302A7C92008101B9 /* AppleScreenshotInputBridge.swift in Sources */,
+				9B4B705C302A7C92008101B9 /* ComfyShotInputBridge.swift in Sources */,
 				9B4B705D302A7C92008101B9 /* CaptureAreaCoordinator.swift in Sources */,
 				9B965D46302A87B6003000F0 /* UpdateController.swift in Sources */,
 				9B4B705E302A7C92008101B9 /* PermissionService.swift in Sources */,

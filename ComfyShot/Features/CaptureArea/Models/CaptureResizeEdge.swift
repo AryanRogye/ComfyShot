@@ -6,7 +6,7 @@
 //
 
 
-enum CaptureResizeEdge {
+enum CaptureResizeEdge: Equatable {
     case top
     case bottom
     case leading

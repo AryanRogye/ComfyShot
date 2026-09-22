@@ -30,10 +30,11 @@ import Foundation
 final class CaptureInputInterceptor {
     // MARK: - Capture Actions
     var mouseDown: ((CGPoint) -> Void)?
+    var mouseMoved: ((CGPoint) -> Void)?
     var mouseDragged: ((CGPoint) -> Void)?
     var mouseUp: ((CGPoint) -> Void)?
-    var mouseMoved: ((CGPoint) -> Void)?
     var cancel: (() -> Void)?
+    var isShiftHeld: ((Bool) -> Void)?
     var clearSelection: (() -> Void)?
     var capture: (() -> Void)?
 
@@ -55,20 +56,22 @@ extension CaptureInputInterceptor {
     /// AppKit input when system permission or tap creation is unavailable.
     public func start(
         mouseDown: @escaping (CGPoint) -> Void,
+        mouseMoved: @escaping (CGPoint) -> Void,
         mouseDragged: @escaping (CGPoint) -> Void,
         mouseUp: @escaping (CGPoint) -> Void,
-        mouseMoved: @escaping (CGPoint) -> Void,
         cancel: @escaping () -> Void,
         clearSelection: @escaping () -> Void,
+        isShiftHeld: @escaping (Bool) -> Void,
         capture: @escaping () -> Void,
     ) -> Bool {
         stop()
         self.mouseDown = mouseDown
+        self.mouseMoved = mouseMoved
         self.mouseDragged = mouseDragged
         self.clearSelection = clearSelection
         self.mouseUp = mouseUp
-        self.mouseMoved = mouseMoved
         self.cancel = cancel
+        self.isShiftHeld = isShiftHeld
         self.capture = capture
         /// Lets us intercept mouse/keyboard input
         /// before any apps reacts to it
@@ -90,7 +93,8 @@ extension CaptureInputInterceptor {
                     .otherMouseUp,
                     .mouseMoved,
                     .scrollWheel,
-                    .keyDown
+                    .keyDown,
+                    .flagsChanged
                 ]
             ),
             callback: Self.eventTapCallback,
@@ -165,6 +169,9 @@ extension CaptureInputInterceptor {
         case .keyDown:
             return handleKeyDown(event)
 
+        case .flagsChanged:
+            return handleKeyDown(event)
+
         default:
             return Unmanaged.passUnretained(event)
         }
@@ -178,6 +185,8 @@ extension CaptureInputInterceptor {
             capture?()
         case 53:
             cancel?()
+        case 56, 60:
+            isShiftHeld?(event.flags.contains(.maskShift))
         case 8:
             clearSelection?()
         default:
@@ -188,9 +197,10 @@ extension CaptureInputInterceptor {
 
     func clearHandlers() {
         self.mouseDown = nil
+        self.mouseMoved = nil
         self.mouseDragged = nil
         self.mouseUp = nil
-        self.mouseMoved = nil
+        self.isShiftHeld = nil
         self.cancel = nil
         self.clearSelection = nil
         self.capture = nil
