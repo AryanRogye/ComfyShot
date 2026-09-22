@@ -43,7 +43,11 @@ final class AppleScreenshotInputBridge {
     /// When this succeeds, the tap consumes input before the foreground app or
     /// Dock receives it, preserving their last menu and hover state.
     @discardableResult
-    func start(contexts: [OverlayContext], onCancel: @escaping () -> Void) -> Bool {
+    func start(
+        contexts: [OverlayContext],
+        onCancel: @escaping () -> Void,
+        onClearSelection: @escaping () -> Void,
+    ) -> Bool {
         overlayContexts = contexts
 
         let didStart = inputInterceptor.start(
@@ -52,6 +56,7 @@ final class AppleScreenshotInputBridge {
             mouseUp: { [weak self] in self?.handleMouseUp(at: $0) },
             mouseMoved: { [weak self] in self?.updateCursor(at: $0) },
             cancel: onCancel,
+            clearSelection: onClearSelection,
             capture: { [weak self] in self?.captureSelectedRect() }
         )
 

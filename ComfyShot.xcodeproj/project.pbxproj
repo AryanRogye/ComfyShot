@@ -64,6 +64,7 @@
 		9B5C92D5303518D800486390 /* DrawKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9B5C92D4303518D800486390 /* DrawKit */; };
 		9B5C92D730351EC500486390 /* EditorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5C92D630351EC400486390 /* EditorSettings.swift */; };
 		9B5C94CE30354CCF00486390 /* DrawKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9B5C94CD30354CCF00486390 /* DrawKit */; };
+		9B8B4CEB3063137000496DFE /* ScrollingCaptureEscapeMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8B4CEA3063137000496DFE /* ScrollingCaptureEscapeMonitor.swift */; };
 		9B92282330507492006D97F5 /* NSScreen+rawValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9228223050748F006D97F5 /* NSScreen+rawValue.swift */; };
 		9B92282530507A7C006D97F5 /* ShiftClickCapturable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92282430507A7C006D97F5 /* ShiftClickCapturable.swift */; };
 		9B92282730509E9E006D97F5 /* DragPreviewFormation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B92282630509E99006D97F5 /* DragPreviewFormation.swift */; };
@@ -148,6 +149,7 @@
 		9B5C92C93035074200486390 /* ImageEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageEditView.swift; sourceTree = "<group>"; };
 		9B5C92D13035114500486390 /* ExportImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportImageView.swift; sourceTree = "<group>"; };
 		9B5C92D630351EC400486390 /* EditorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorSettings.swift; sourceTree = "<group>"; };
+		9B8B4CEA3063137000496DFE /* ScrollingCaptureEscapeMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingCaptureEscapeMonitor.swift; sourceTree = "<group>"; };
 		9B9228223050748F006D97F5 /* NSScreen+rawValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSScreen+rawValue.swift"; sourceTree = "<group>"; };
 		9B92282430507A7C006D97F5 /* ShiftClickCapturable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShiftClickCapturable.swift; sourceTree = "<group>"; };
 		9B92282630509E99006D97F5 /* DragPreviewFormation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragPreviewFormation.swift; sourceTree = "<group>"; };
@@ -259,6 +261,7 @@
 		9B4B7017302A7C92008101B9 /* Scrolling */ = {
 			isa = PBXGroup;
 			children = (
+				9B8B4CEA3063137000496DFE /* ScrollingCaptureEscapeMonitor.swift */,
 				9B4B7013302A7C92008101B9 /* AXUIElement+ScrollingCapture.swift */,
 				9B4B7014302A7C92008101B9 /* ScrollingCaptureDiscoverer.swift */,
 				9B4B7015302A7C92008101B9 /* ScrollingCaptureService.swift */,
@@ -592,6 +595,7 @@
 				9B4B705E302A7C92008101B9 /* PermissionService.swift in Sources */,
 				9B4B705F302A7C92008101B9 /* PermissionView.swift in Sources */,
 				9B4B7060302A7C92008101B9 /* DefaultKeys.swift in Sources */,
+				9B8B4CEB3063137000496DFE /* ScrollingCaptureEscapeMonitor.swift in Sources */,
 				9B4B7061302A7C92008101B9 /* DefaultsManager.swift in Sources */,
 				9BF126A5302AC65700449787 /* SettingsTab.swift in Sources */,
 				9BF126A9302AC6DF00449787 /* ShortcutSettings.swift in Sources */,

@@ -34,6 +34,7 @@ final class CaptureInputInterceptor {
     var mouseUp: ((CGPoint) -> Void)?
     var mouseMoved: ((CGPoint) -> Void)?
     var cancel: (() -> Void)?
+    var clearSelection: (() -> Void)?
     var capture: (() -> Void)?
 
     private var eventTap: CFMachPort?
@@ -58,11 +59,13 @@ extension CaptureInputInterceptor {
         mouseUp: @escaping (CGPoint) -> Void,
         mouseMoved: @escaping (CGPoint) -> Void,
         cancel: @escaping () -> Void,
+        clearSelection: @escaping () -> Void,
         capture: @escaping () -> Void,
     ) -> Bool {
         stop()
         self.mouseDown = mouseDown
         self.mouseDragged = mouseDragged
+        self.clearSelection = clearSelection
         self.mouseUp = mouseUp
         self.mouseMoved = mouseMoved
         self.cancel = cancel
@@ -175,6 +178,8 @@ extension CaptureInputInterceptor {
             capture?()
         case 53:
             cancel?()
+        case 8:
+            clearSelection?()
         default:
             break
         }
@@ -187,6 +192,7 @@ extension CaptureInputInterceptor {
         self.mouseUp = nil
         self.mouseMoved = nil
         self.cancel = nil
+        self.clearSelection = nil
         self.capture = nil
     }
 }
