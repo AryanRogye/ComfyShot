@@ -69,36 +69,35 @@ final class CaptureAreaCoordinator {
         
         guard let keyOverlay = overlayForMouse() ?? overlayContexts.map(\.panel).first else { return }
 
+        /// Intercept session input before it reaches apps while allowing
+        /// WindowServer to move the system cursor normally.
+        let inputInterceptorStarted = appleScreenshotInputBridge.start(
+            contexts: overlayContexts,
+            onCancel: { [weak self] in
+                self?.hide()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) { [weak self] in
+                    self?.onCaptureFinished?()
+                }
+            }
+        )
+
         for overlayScreen in overlayContexts.map(\.panel) {
-            if overlayScreen === keyOverlay {
-                overlayScreen.orderFrontRegardless()
+            overlayScreen.orderFrontRegardless()
+            overlayScreen.ignoresMouseEvents = inputInterceptorStarted
+
+            if !inputInterceptorStarted && overlayScreen === keyOverlay {
                 overlayScreen.makeKey()
                 overlayScreen.makeFirstResponder(overlayScreen.contentView)
-            } else {
-                overlayScreen.orderFrontRegardless()
             }
-            overlayScreen.ignoresMouseEvents = false
             applyCrosshairCursor(to: overlayScreen)
         }
-        
-        if defaultsManager.captureOverAppleScreenshotUI {
-            appleScreenshotInputBridge.startIfNeeded(
-                contexts: overlayContexts,
-                onCancel: { [weak self] in
-                    self?.hide()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) { [weak self] in
-                        self?.onCaptureFinished?()
-                    }
-                }
-            )
-        }
+
+        if inputInterceptorStarted { appleScreenshotInputBridge.refreshCursor() }
     }
     
     public func hide() {
         isStartingScrollCapture = false
-        if defaultsManager.captureOverAppleScreenshotUI {
-            appleScreenshotInputBridge.stop()
-        }
+        appleScreenshotInputBridge.stop()
         
         guard !overlayContexts.isEmpty else {
             print("Cant Hide, Overlay is nil")
@@ -176,9 +175,7 @@ extension CaptureAreaCoordinator {
     private func closeAndResetOverlayPanels() {
         guard !overlayContexts.isEmpty else { return }
 
-        if defaultsManager.captureOverAppleScreenshotUI {
-            appleScreenshotInputBridge.stop()
-        }
+        appleScreenshotInputBridge.stop()
         overlayContexts.map(\.panel).forEach {
             $0.orderOut(nil)
             $0.close()
@@ -246,7 +243,8 @@ extension CaptureAreaCoordinator {
                     guard let self else { return }
                     if let image = await self.screenshot.takeScreenshot(
                         of: captureTarget.screen,
-                        croppingTo: captureTarget.rect
+                        croppingTo: captureTarget.rect,
+                        options: ScreenshotCaptureOptions(showsCursor: false)
                     ) {
                         self.onCaptureImage?(image, captureTarget.screen)
                     }

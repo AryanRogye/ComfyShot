@@ -12,21 +12,22 @@ import SwiftUI
 @MainActor
 enum CaptureCursorOverride {
     private static var cursor: NSCursor?
+    private static var interceptedCursor: NSCursor?
     
     static func setResizeUpDown() {
-        set(.frameResize(position: .top, directions: .all))
+        set(resizeCursor(for: .top))
     }
     
     static func setResizeLeftRight() {
-        set(.frameResize(position: .left, directions: .all))
+        set(resizeCursor(for: .leading))
     }
 
     static func setResizeTopLeftBottomRight() {
-        set(.frameResize(position: .topLeft, directions: .all))
+        set(resizeCursor(for: .topLeading))
     }
 
     static func setResizeTopRightBottomLeft() {
-        set(.frameResize(position: .topRight, directions: .all))
+        set(resizeCursor(for: .topTrailing))
     }
     
     static func setOpenHand() {
@@ -42,7 +43,32 @@ enum CaptureCursorOverride {
     }
     
     static func current(default defaultCursor: NSCursor) -> NSCursor {
-        cursor ?? defaultCursor
+        interceptedCursor ?? cursor ?? defaultCursor
+    }
+
+    /// Keep the cursor rect and the intercepted input path on the same shape.
+    static func setInterceptedCursor(_ newCursor: NSCursor) {
+        interceptedCursor = newCursor
+        newCursor.set()
+    }
+
+    static func clearInterceptedCursor() {
+        interceptedCursor = nil
+        cursor = nil
+    }
+
+    /// Returns the resize cursor used by both AppKit input paths.
+    static func resizeCursor(for edge: CaptureResizeEdge) -> NSCursor {
+        switch edge {
+        case .top, .bottom:
+            .frameResize(position: .top, directions: .all)
+        case .leading, .trailing:
+            .frameResize(position: .left, directions: .all)
+        case .topLeading, .bottomTrailing:
+            .frameResize(position: .topLeft, directions: .all)
+        case .topTrailing, .bottomLeading:
+            .frameResize(position: .topRight, directions: .all)
+        }
     }
     
     private static func set(_ newCursor: NSCursor?) {

@@ -27,13 +27,14 @@ struct SelectionOverlay: View {
                 topRow
                 Spacer()
             }
+
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .gesture(dragGesture)
         .onExitCommand(perform: model.exit)
     }
-    
+
     private var dimmedBackground: some View {
         GeometryReader { proxy in
             Path { path in
