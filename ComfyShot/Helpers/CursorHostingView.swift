@@ -12,6 +12,7 @@ import SwiftUI
 @MainActor
 enum CaptureCursorOverride {
     private static var cursor: NSCursor?
+    private static var interceptedCursor: NSCursor?
     
     static func setResizeUpDown() {
         set(resizeCursor(for: .top))
@@ -42,11 +43,21 @@ enum CaptureCursorOverride {
     }
     
     static func current(default defaultCursor: NSCursor) -> NSCursor {
-        cursor ?? defaultCursor
+        interceptedCursor ?? cursor ?? defaultCursor
     }
 
-    /// Returns the same resize cursor for both the AppKit fallback and the
-    /// virtual cursor drawn while global input interception is active.
+    /// Keep the cursor rect and the intercepted input path on the same shape.
+    static func setInterceptedCursor(_ newCursor: NSCursor) {
+        interceptedCursor = newCursor
+        newCursor.set()
+    }
+
+    static func clearInterceptedCursor() {
+        interceptedCursor = nil
+        cursor = nil
+    }
+
+    /// Returns the resize cursor used by both AppKit input paths.
     static func resizeCursor(for edge: CaptureResizeEdge) -> NSCursor {
         switch edge {
         case .top, .bottom:

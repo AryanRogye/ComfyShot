@@ -12,7 +12,7 @@ import CoreGraphics
 ///
 /// `CaptureInputInterceptor` owns the macOS event system. This bridge owns the
 /// capture meaning of those events: choosing a display, drawing a selection,
-/// moving it, resizing it, and positioning ComfyShot's virtual cursor.
+/// moving it, resizing it, and setting the system cursor shape.
 ///
 /// The name is historical. The bridge originally existed only for capturing
 /// over Apple's screenshot UI, but it now drives every isolated area capture.
@@ -27,10 +27,10 @@ final class AppleScreenshotInputBridge {
     }
 
     private let inputInterceptor = CaptureInputInterceptor()
+    private let cursorController = SystemCursorController()
     private var overlayContexts: [OverlayContext] = []
 
-    /// A drag stays attached to the display where it began, even when the virtual
-    /// pointer reaches that display's edge.
+    /// A drag stays attached to the display where it began.
     private var activeInputContext: OverlayContext?
     private var dragOperation: DragOperation?
 
@@ -40,8 +40,8 @@ final class AppleScreenshotInputBridge {
 
     /// Starts isolated input and returns whether the event tap became active.
     ///
-    /// When this succeeds, overlay panels can ignore AppKit mouse events and stay
-    /// non-key. That is what preserves open menus and Dock hover state.
+    /// When this succeeds, the tap consumes input before the foreground app or
+    /// Dock receives it, preserving their last menu and hover state.
     @discardableResult
     func start(contexts: [OverlayContext], onCancel: @escaping () -> Void) -> Bool {
         overlayContexts = contexts
@@ -50,13 +50,13 @@ final class AppleScreenshotInputBridge {
             mouseDown: { [weak self] in self?.handleMouseDown(at: $0) },
             mouseDragged: { [weak self] in self?.handleMouseDragged(to: $0) },
             mouseUp: { [weak self] in self?.handleMouseUp(at: $0) },
-            mouseMoved: { [weak self] in self?.updateVirtualCursor(to: $0) },
+            mouseMoved: { [weak self] in self?.updateCursor(at: $0) },
             cancel: onCancel,
             capture: { [weak self] in self?.captureSelectedRect() }
         )
 
         if didStart {
-            updateVirtualCursor(to: NSEvent.mouseLocation)
+            updateCursor(at: NSEvent.mouseLocation)
         } else {
             print("Capture input interceptor could not start. Accessibility/Input Monitoring permission may be required.")
         }
@@ -66,19 +66,15 @@ final class AppleScreenshotInputBridge {
     /// Ends input interception and clears every piece of session-only state.
     func stop() {
         inputInterceptor.stop()
-        overlayContexts.forEach {
-            $0.model.virtualCursorLocation = nil
-            $0.model.virtualCursor = .crosshair
-        }
+        cursorController.stop()
         overlayContexts = []
         activeInputContext = nil
         dragOperation = nil
     }
 
-    /// Hides the hardware cursor after the coordinator presents its panels.
-    /// Waiting prevents panel cursor rectangles from undoing the hide.
-    func hideSystemCursor() {
-        inputInterceptor.hideSystemCursor()
+    /// Restores the capture cursor after the panels install their cursor rects.
+    func refreshCursor() {
+        updateCursor(at: NSEvent.mouseLocation)
     }
 }
 
@@ -86,7 +82,7 @@ final class AppleScreenshotInputBridge {
 extension AppleScreenshotInputBridge {
     /// Chooses whether this drag draws, moves, or resizes a selection.
     private func handleMouseDown(at globalPoint: CGPoint) {
-        updateVirtualCursor(to: globalPoint)
+        updateCursor(at: globalPoint)
 
         guard let context = overlayContext(containing: globalPoint),
               let localPoint = localOverlayPoint(for: globalPoint, in: context.panel) else {
@@ -103,10 +99,10 @@ extension AppleScreenshotInputBridge {
 
         if let edge = resizeEdge(at: localPoint, in: selectionRect) {
             dragOperation = .resizing(edge: edge, startPoint: localPoint)
-            context.model.virtualCursor = CaptureCursorOverride.resizeCursor(for: edge)
+            cursorController.setCursor(CaptureCursorOverride.resizeCursor(for: edge))
         } else if selectionRect.contains(localPoint) {
             dragOperation = .moving(startPoint: localPoint)
-            context.model.virtualCursor = .closedHand
+            cursorController.setCursor(.closedHand)
         } else {
             beginDrawing(at: localPoint, in: context)
         }
@@ -114,7 +110,7 @@ extension AppleScreenshotInputBridge {
 
     /// Applies cumulative translation from the original mouse-down point.
     private func handleMouseDragged(to globalPoint: CGPoint) {
-        updateVirtualCursor(to: globalPoint)
+        updateCursor(at: globalPoint)
         guard let context = activeInputContext,
               let localPoint = localOverlayPoint(for: globalPoint, in: context.panel) else { return }
 
@@ -135,11 +131,11 @@ extension AppleScreenshotInputBridge {
 
     /// Commits the active model operation, then releases drag ownership.
     private func handleMouseUp(at globalPoint: CGPoint) {
-        updateVirtualCursor(to: globalPoint)
+        updateCursor(at: globalPoint)
         defer {
             activeInputContext = nil
             dragOperation = nil
-            updateVirtualCursor(to: globalPoint)
+            updateCursor(at: globalPoint)
         }
 
         guard let context = activeInputContext,
@@ -172,40 +168,33 @@ extension AppleScreenshotInputBridge {
     }
 }
 
-// MARK: - Virtual Cursor
+// MARK: - System Cursor
 extension AppleScreenshotInputBridge {
-    /// Draws the replacement cursor only on the display containing this point.
-    private func updateVirtualCursor(to globalPoint: CGPoint) {
-        for context in overlayContexts {
-            guard let localPoint = localOverlayPoint(for: globalPoint, in: context.panel) else {
-                context.model.virtualCursorLocation = nil
-                continue
-            }
-
-            context.model.virtualCursorLocation = localPoint
-            context.model.virtualCursor = virtualCursor(
-                at: localPoint,
-                in: context
-            )
-        }
-    }
-
-    /// Chooses the cursor from the active drag first, then from the selection hit
-    /// region under the virtual pointer. This mirrors `SelectionRect`'s fallback.
-    private func virtualCursor(at point: CGPoint, in context: OverlayContext) -> NSCursor {
-        if context.panel === activeInputContext?.panel {
+    private func updateCursor(at globalPoint: CGPoint) {
+        if let dragOperation {
             switch dragOperation {
             case .drawing:
-                return .crosshair
+                cursorController.setCursor(.crosshair)
             case .moving:
-                return .closedHand
+                cursorController.setCursor(.closedHand)
             case .resizing(let edge, _):
-                return CaptureCursorOverride.resizeCursor(for: edge)
-            case nil:
-                break
+                cursorController.setCursor(CaptureCursorOverride.resizeCursor(for: edge))
             }
+            return
         }
 
+        guard let context = overlayContext(containing: globalPoint),
+              let localPoint = localOverlayPoint(for: globalPoint, in: context.panel) else {
+            cursorController.setCursor(.crosshair)
+            return
+        }
+
+        cursorController.setCursor(cursor(at: localPoint, in: context))
+    }
+
+    /// Chooses the cursor from the selection hit region under the pointer.
+    /// This mirrors `SelectionRect`'s fallback.
+    private func cursor(at point: CGPoint, in context: OverlayContext) -> NSCursor {
         guard let selectionRect = context.model.selectionRect else {
             return .crosshair
         }

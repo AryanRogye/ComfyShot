@@ -12,12 +12,11 @@ import Foundation
 
 /// Owns keyboard and pointer input during an isolated area capture.
 ///
-/// The event tap consumes input before the Dock or foreground application sees
-/// it. Their last hover, menu, or pressed state therefore remains onscreen.
-/// Because consumed movement cannot move the hardware cursor, this type builds a
-/// virtual position from raw mouse deltas and sends that position to the UI.
+/// The session event tap consumes input before the Dock or foreground application
+/// sees it, after WindowServer has moved the system cursor. Their last hover,
+/// menu, or pressed state therefore remains onscreen.
 ///
-/// Event Mask: [.leftMouseDown, .leftMouseDragged, .leftMouseUp, .mouseMoved, .scrollWheel, .keyDown]
+/// Event Mask: pointer buttons, movement, scrolling, and key down.
 ///
 /// The event tap is attached to the main run loop.
 ///
@@ -44,21 +43,6 @@ final class CaptureInputInterceptor {
     /// independently from the incoming Core Graphics event type.
     private var isDragging = false
 
-    /// This uses AppKit's global, bottom-left screen coordinate system.
-    private var virtualMouseLocation: CGPoint = .zero
-    /// Parking can appear as one large HID delta even though no mouse-moved event
-    /// is posted. Ignoring that delta keeps the virtual pointer at its start point.
-    private var shouldIgnoreNextMouseDelta = false
-
-    lazy var cursorController = SystemCursorController(
-        onGetVirtualMouseLocation: { [weak self] in
-            self?.virtualMouseLocation ?? .zero
-        },
-        onGetIsRunning: { [weak self] in
-            self?.isRunning ?? false
-        }
-    )
-
     var isRunning: Bool {
         eventTap != nil
     }
@@ -66,7 +50,7 @@ final class CaptureInputInterceptor {
 
 // MARK: - Public API's
 extension CaptureInputInterceptor {
-    /// Installs the HID event tap. `false` lets the coordinator use ordinary
+    /// Installs the session event tap. `false` lets the coordinator use ordinary
     /// AppKit input when system permission or tap creation is unavailable.
     public func start(
         mouseDown: @escaping (CGPoint) -> Void,
@@ -83,13 +67,10 @@ extension CaptureInputInterceptor {
         self.mouseMoved = mouseMoved
         self.cancel = cancel
         self.capture = capture
-        self.virtualMouseLocation = NSEvent.mouseLocation
-        self.shouldIgnoreNextMouseDelta = false
-
         /// Lets us intercept mouse/keyboard input
         /// before any apps reacts to it
         guard let eventTap = CGEvent.tapCreate(
-            tap: .cghidEventTap,
+            tap: .cgSessionEventTap,
             place: .headInsertEventTap,
             options: .defaultTap,
             /// Masks that we want to capture
@@ -98,6 +79,12 @@ extension CaptureInputInterceptor {
                     .leftMouseDown,
                     .leftMouseDragged,
                     .leftMouseUp,
+                    .rightMouseDown,
+                    .rightMouseDragged,
+                    .rightMouseUp,
+                    .otherMouseDown,
+                    .otherMouseDragged,
+                    .otherMouseUp,
                     .mouseMoved,
                     .scrollWheel,
                     .keyDown
@@ -114,7 +101,7 @@ extension CaptureInputInterceptor {
     }
 
     // MARK: - Stop
-    /// Tears down interception and restores the real pointer. This is idempotent
+    /// Tears down interception. This is idempotent
     /// because several capture completion and cancellation paths call it.
     public func stop() {
         if let eventTap {
@@ -128,16 +115,6 @@ extension CaptureInputInterceptor {
         runLoopSource = nil
         clearHandlers()
         isDragging = false
-        cursorController.showSystemCursor()
-        virtualMouseLocation = .zero
-        shouldIgnoreNextMouseDelta = false
-    }
-
-    /// Hides the real pointer after all capture panels are onscreen. Panel
-    /// presentation can install a cursor rectangle, so calling this sooner races
-    /// with AppKit and makes the hardware cursor reappear.
-    public func hideSystemCursor() {
-        shouldIgnoreNextMouseDelta = cursorController.hideSystemCursor()
     }
 
 }
@@ -150,17 +127,17 @@ extension CaptureInputInterceptor {
         switch type {
         case .leftMouseDown:
             isDragging = true
-            let point = virtualMouseLocation
+            let point = event.location.appKitPoint
             mouseDown?(point)
             return nil
 
         case .leftMouseDragged:
-            let point = advanceVirtualMouse(using: event)
+            let point = event.location.appKitPoint
             mouseDragged?(point)
             return nil
 
         case .mouseMoved:
-            let point = advanceVirtualMouse(using: event)
+            let point = event.location.appKitPoint
             if isDragging {
                 mouseDragged?(point)
             } else {
@@ -170,12 +147,16 @@ extension CaptureInputInterceptor {
 
         case .leftMouseUp:
             isDragging = false
-            let point = virtualMouseLocation
+            let point = event.location.appKitPoint
             mouseUp?(point)
             return nil
 
         case .scrollWheel:
             /// Scrolling would mutate the frozen content beneath the overlay.
+            return nil
+
+        case .rightMouseDown, .rightMouseDragged, .rightMouseUp,
+             .otherMouseDown, .otherMouseDragged, .otherMouseUp:
             return nil
 
         case .keyDown:
@@ -207,48 +188,6 @@ extension CaptureInputInterceptor {
         self.mouseMoved = nil
         self.cancel = nil
         self.capture = nil
-    }
-}
-
-// MARK: - Virtual Pointer
-extension CaptureInputInterceptor {
-    /// Builds a virtual AppKit position from raw HID deltas. HID Y grows downward,
-    /// while AppKit global Y grows upward, so the Y delta is inverted.
-    private func advanceVirtualMouse(using event: CGEvent) -> CGPoint {
-        if shouldIgnoreNextMouseDelta {
-            shouldIgnoreNextMouseDelta = false
-            return virtualMouseLocation
-        }
-
-        let deltaX = CGFloat(event.getIntegerValueField(.mouseEventDeltaX))
-        let deltaY = CGFloat(event.getIntegerValueField(.mouseEventDeltaY))
-        let proposedPoint = CGPoint(
-            x: virtualMouseLocation.x + deltaX,
-            y: virtualMouseLocation.y - deltaY
-        )
-
-        virtualMouseLocation = Self.pointConstrainedToScreens(proposedPoint)
-        return virtualMouseLocation
-    }
-
-    /// Keeps the virtual pointer on the nearest real display when a multi-display
-    /// arrangement contains gaps or the pointer reaches an outer screen edge.
-    private static func pointConstrainedToScreens(_ point: CGPoint) -> CGPoint {
-        let frames = NSScreen.screens.map(\.frame)
-        guard !frames.isEmpty else { return point }
-        if frames.contains(where: { $0.contains(point) }) { return point }
-
-        return frames
-            .map { frame in
-                CGPoint(
-                    x: min(max(point.x, frame.minX), frame.maxX - 0.001),
-                    y: min(max(point.y, frame.minY), frame.maxY - 0.001)
-                )
-            }
-            .min {
-                hypot($0.x - point.x, $0.y - point.y)
-                    < hypot($1.x - point.x, $1.y - point.y)
-            } ?? point
     }
 }
 

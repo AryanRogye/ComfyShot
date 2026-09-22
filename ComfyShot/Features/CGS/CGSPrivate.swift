@@ -17,8 +17,3 @@ func CGSSetConnectionProperty(
     _ key: CFString,
     _ value: CFTypeRef
 ) -> CGError
-
-/// WindowServer exports this symbol even though the public SDK marks it
-/// unavailable. It tells us when another process has made the cursor visible.
-@_silgen_name("CGCursorIsVisible")
-func CGCursorIsVisible() -> Int32

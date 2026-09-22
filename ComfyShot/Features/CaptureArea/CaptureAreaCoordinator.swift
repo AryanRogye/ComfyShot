@@ -69,9 +69,8 @@ final class CaptureAreaCoordinator {
         
         guard let keyOverlay = overlayForMouse() ?? overlayContexts.map(\.panel).first else { return }
 
-        /// Install the HID event tap before presenting any panel. Consuming pointer
-        /// events at that level lets the cursor keep moving while the Dock or an
-        /// open menu remains in its last delivered hover/tracking state.
+        /// Intercept session input before it reaches apps while allowing
+        /// WindowServer to move the system cursor normally.
         let inputInterceptorStarted = appleScreenshotInputBridge.start(
             contexts: overlayContexts,
             onCancel: { [weak self] in
@@ -90,16 +89,10 @@ final class CaptureAreaCoordinator {
                 overlayScreen.makeKey()
                 overlayScreen.makeFirstResponder(overlayScreen.contentView)
             }
-            if !inputInterceptorStarted {
-                applyCrosshairCursor(to: overlayScreen)
-            }
+            applyCrosshairCursor(to: overlayScreen)
         }
 
-        if inputInterceptorStarted {
-            /// Panel presentation can make AppKit install one of its cursor rects.
-            /// Hide the hardware cursor only after every panel has been ordered in.
-            appleScreenshotInputBridge.hideSystemCursor()
-        }
+        if inputInterceptorStarted { appleScreenshotInputBridge.refreshCursor() }
     }
     
     public func hide() {

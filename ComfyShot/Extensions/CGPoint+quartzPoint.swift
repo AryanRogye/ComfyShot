@@ -8,14 +8,16 @@
 import AppKit
 
 extension CGPoint {
-    public var quartzPoint: CGPoint {
-        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(self) }),
-              let displayID = screen.displayID else { return self }
+    public var appKitPoint: CGPoint {
+        guard let screen = NSScreen.screens.first(where: { screen in
+            guard let displayID = screen.displayID else { return false }
+            return CGDisplayBounds(displayID).contains(self)
+        }), let displayID = screen.displayID else { return self }
 
         let quartzFrame = CGDisplayBounds(displayID)
         return CGPoint(
-            x: quartzFrame.minX + self.x - screen.frame.minX,
-            y: quartzFrame.minY + screen.frame.maxY - self.y
+            x: screen.frame.minX + x - quartzFrame.minX,
+            y: screen.frame.maxY - (y - quartzFrame.minY)
         )
     }
 }
