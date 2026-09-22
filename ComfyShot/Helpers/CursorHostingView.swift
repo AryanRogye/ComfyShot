@@ -14,19 +14,19 @@ enum CaptureCursorOverride {
     private static var cursor: NSCursor?
     
     static func setResizeUpDown() {
-        set(.frameResize(position: .top, directions: .all))
+        set(resizeCursor(for: .top))
     }
     
     static func setResizeLeftRight() {
-        set(.frameResize(position: .left, directions: .all))
+        set(resizeCursor(for: .leading))
     }
 
     static func setResizeTopLeftBottomRight() {
-        set(.frameResize(position: .topLeft, directions: .all))
+        set(resizeCursor(for: .topLeading))
     }
 
     static func setResizeTopRightBottomLeft() {
-        set(.frameResize(position: .topRight, directions: .all))
+        set(resizeCursor(for: .topTrailing))
     }
     
     static func setOpenHand() {
@@ -43,6 +43,21 @@ enum CaptureCursorOverride {
     
     static func current(default defaultCursor: NSCursor) -> NSCursor {
         cursor ?? defaultCursor
+    }
+
+    /// Returns the same resize cursor for both the AppKit fallback and the
+    /// virtual cursor drawn while global input interception is active.
+    static func resizeCursor(for edge: CaptureResizeEdge) -> NSCursor {
+        switch edge {
+        case .top, .bottom:
+            .frameResize(position: .top, directions: .all)
+        case .leading, .trailing:
+            .frameResize(position: .left, directions: .all)
+        case .topLeading, .bottomTrailing:
+            .frameResize(position: .topLeft, directions: .all)
+        case .topTrailing, .bottomLeading:
+            .frameResize(position: .topRight, directions: .all)
+        }
     }
     
     private static func set(_ newCursor: NSCursor?) {

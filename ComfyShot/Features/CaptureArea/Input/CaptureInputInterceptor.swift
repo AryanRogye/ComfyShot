@@ -46,6 +46,9 @@ final class CaptureInputInterceptor {
 
     /// This uses AppKit's global, bottom-left screen coordinate system.
     private var virtualMouseLocation: CGPoint = .zero
+    /// Parking can appear as one large HID delta even though no mouse-moved event
+    /// is posted. Ignoring that delta keeps the virtual pointer at its start point.
+    private var shouldIgnoreNextMouseDelta = false
 
     lazy var cursorController = SystemCursorController(
         onGetVirtualMouseLocation: { [weak self] in
@@ -81,6 +84,7 @@ extension CaptureInputInterceptor {
         self.cancel = cancel
         self.capture = capture
         self.virtualMouseLocation = NSEvent.mouseLocation
+        self.shouldIgnoreNextMouseDelta = false
 
         /// Lets us intercept mouse/keyboard input
         /// before any apps reacts to it
@@ -125,13 +129,15 @@ extension CaptureInputInterceptor {
         clearHandlers()
         isDragging = false
         cursorController.showSystemCursor()
+        virtualMouseLocation = .zero
+        shouldIgnoreNextMouseDelta = false
     }
 
     /// Hides the real pointer after all capture panels are onscreen. Panel
     /// presentation can install a cursor rectangle, so calling this sooner races
     /// with AppKit and makes the hardware cursor reappear.
     public func hideSystemCursor() {
-        cursorController.hideSystemCursor()
+        shouldIgnoreNextMouseDelta = cursorController.hideSystemCursor()
     }
 
 }
@@ -209,6 +215,11 @@ extension CaptureInputInterceptor {
     /// Builds a virtual AppKit position from raw HID deltas. HID Y grows downward,
     /// while AppKit global Y grows upward, so the Y delta is inverted.
     private func advanceVirtualMouse(using event: CGEvent) -> CGPoint {
+        if shouldIgnoreNextMouseDelta {
+            shouldIgnoreNextMouseDelta = false
+            return virtualMouseLocation
+        }
+
         let deltaX = CGFloat(event.getIntegerValueField(.mouseEventDeltaX))
         let deltaY = CGFloat(event.getIntegerValueField(.mouseEventDeltaY))
         let proposedPoint = CGPoint(

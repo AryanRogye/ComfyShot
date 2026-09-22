@@ -5,6 +5,7 @@
 //  Created by Aryan Rogye on 6/30/26.
 //
 
+import AppKit
 import CoreGraphics
 import Observation
 
@@ -17,6 +18,8 @@ final class CaptureAreaModel {
     /// The visible cursor position used while the real system cursor is hidden.
     /// This is local to the overlay and uses SwiftUI's top-left coordinate space.
     var virtualCursorLocation: CGPoint?
+    /// The cursor image drawn at `virtualCursorLocation` while the real cursor is hidden.
+    var virtualCursor: NSCursor = .crosshair
 
     private var initialMoveStart: CGPoint?
     private var initialMoveCurrent: CGPoint?

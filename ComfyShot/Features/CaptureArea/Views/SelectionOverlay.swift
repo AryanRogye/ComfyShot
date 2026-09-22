@@ -40,7 +40,7 @@ struct SelectionOverlay: View {
     @ViewBuilder
     private var virtualCursor: some View {
         if let location = model.virtualCursorLocation {
-            let cursor = NSCursor.crosshair
+            let cursor = model.virtualCursor
             let imageSize = cursor.image.size
 
             /// Position the cursor by its hotspot rather than its image center so

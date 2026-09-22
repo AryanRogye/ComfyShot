@@ -30,13 +30,18 @@ final class SystemCursorController {
 
 extension SystemCursorController {
 
-    func hideSystemCursor() {
-        guard onGetIsRunning(), systemCursorHideCount == 0 else { return }
+    /// Returns `true` when the hardware pointer was warped to its parking point.
+    /// The input interceptor uses that result to discard the synthetic delta that
+    /// WindowServer may attach to the next physical mouse event.
+    @discardableResult
+    func hideSystemCursor() -> Bool {
+        guard onGetIsRunning(), systemCursorHideCount == 0 else { return false }
 
         enableBackgroundCursorControlIfNeeded()
-        parkHardwareCursorOutsideDock()
+        let didParkHardwareCursor = parkHardwareCursorOutsideDock()
         hideVisibleSystemCursor()
         beginCursorVisibilityEnforcement()
+        return didParkHardwareCursor
     }
 
     /// Restores the pointer at the final virtual position, then balances every
@@ -94,13 +99,13 @@ extension SystemCursorController {
     /// Moves the hardware pointer away from the Dock without sending a movement
     /// event. The Dock keeps its last hover state, but no longer owns the cursor
     /// sprite that it otherwise draws over a successful global hide.
-    private func parkHardwareCursorOutsideDock() {
-        guard !hasParkedHardwareCursor else { return }
+    private func parkHardwareCursorOutsideDock() -> Bool {
+        guard !hasParkedHardwareCursor else { return false }
 
         guard let screen = NSScreen.screens.first(where: {
             $0.frame.contains(onGetVirtualMouseLocation())
         }) ?? NSScreen.main else {
-            return
+            return false
         }
 
         let parkingPoint = CGPoint(
@@ -113,6 +118,7 @@ extension SystemCursorController {
         )
 
         hasParkedHardwareCursor = result == .success
+        return hasParkedHardwareCursor
     }
 }
 
