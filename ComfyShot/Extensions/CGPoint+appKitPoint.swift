@@ -1,5 +1,5 @@
 //
-//  CGPoint+quartzPoint.swift
+//  CGPoint+appKitPoint.swift
 //  ComfyShot
 //
 //  Created by Aryan Rogye on 9/9/26.
