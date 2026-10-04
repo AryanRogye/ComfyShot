@@ -8,6 +8,7 @@
 import Defaults
 import Foundation
 import DrawKit
+import ServiceManagement
 
 @Observable
 @MainActor
@@ -28,6 +29,13 @@ final class DefaultsManager {
     var dragPreviewFormation: DragPreviewFormation = Defaults[.dragPreviewFormation] {
         didSet {
             Defaults[.dragPreviewFormation] = dragPreviewFormation
+        }
+    }
+
+    var launchAtLogin: Bool = Defaults[.launchAtLogin] {
+        didSet {
+            Defaults[.launchAtLogin] = launchAtLogin
+            handleLaunchAtLoginChange()
         }
     }
 
@@ -60,6 +68,30 @@ final class DefaultsManager {
                 Defaults[.editorDefaultSelection] = self.editorDefaultSelection
                 
                 self.observeEditorDefaults()
+            }
+        }
+    }
+
+    internal func handleLaunchAtLoginChange() {
+        if launchAtLogin {
+            if SMAppService.mainApp.status == .enabled { return }
+            do {
+                try SMAppService.mainApp.register()
+            } catch {
+                print("Couldnt Register ComfyTab to Launch At Login \(error.localizedDescription)")
+                /// Toggle it Off
+                self.launchAtLogin = false
+            }
+        }
+        /// If Launch At Logic is Turned off
+        else {
+            /// ONLY go through if the status is enabled
+            if SMAppService.mainApp.status != .enabled { return }
+            do {
+                try SMAppService.mainApp.unregister()
+            } catch {
+                print("Couldnt Turn Off Launch At Logic for ComfyTab \(error.localizedDescription)")
+                self.launchAtLogin = true
             }
         }
     }

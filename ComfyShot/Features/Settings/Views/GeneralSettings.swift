@@ -36,6 +36,11 @@ struct GeneralSettings: View {
                     }
                 }
             }
+
+            Section("Startup") {
+                Toggle("Launch At Login", isOn: $defaultsManager.launchAtLogin)
+                    .toggleStyle(.switch)
+            }
         }
         .formStyle(.grouped)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
