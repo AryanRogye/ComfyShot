@@ -24,6 +24,7 @@ struct ImageStackView: View {
     let spacing: CGFloat
     let placement: ImageStackPlacement
     let onClose: (UserImage) -> Void
+    let onOCR: (UserImage) -> Void
     let onEditImage: (UserImage) -> Void
     let onShiftClick: (UserImage) -> Void
 
@@ -50,6 +51,7 @@ struct ImageStackView: View {
                 spacing: spacing,
                 layout: layout,
                 onClose: onClose,
+                onOCR: onOCR,
                 onEditImage: onEditImage,
                 onShiftClick: onShiftClick
             )

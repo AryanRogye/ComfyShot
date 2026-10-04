@@ -122,23 +122,41 @@ final class UserImageCoordinator {
         
         
         let inset = size.insetBy(dx: 100, dy: 100)
-        let editSize: NSSize = .init(width: inset.width, height: inset.height)
-        
-        let stack = DisplayImageStack { [weak self] image in
-            guard let self else { return }
-            
-            windowCoordinator.showWindow(
-                id: image.id.uuidString,
-                title: "\(image.size.width)x\(image.size.height)",
-                content: ImageEditView(
-                    image: image,
-                    defaultSelection: defaultsManager.editorDefaultSelection
-                ),
-                size: editSize,
-                alwaysActiveFocusedLook: true,
-                focusOnOpen: true,
-            )
-        }
+        let windowSize: NSSize = .init(width: inset.width, height: inset.height)
+
+        let stack = DisplayImageStack(
+            onEditImage: { [weak self] image in
+                guard let self else { return }
+
+                windowCoordinator.showWindow(
+                    id: "\(image.id.uuidString)-Edit",
+                    title: "\(image.size.width)x\(image.size.height)-Edit",
+                    content: ImageEditView(
+                        image: image,
+                        defaultSelection: defaultsManager.editorDefaultSelection
+                    ),
+                    size: windowSize,
+                    alwaysActiveFocusedLook: true,
+                    focusOnOpen: true,
+                )
+            },
+            onOCR: { [weak self] image in
+                guard let self else { return }
+
+                /// handle window stuff here
+                windowCoordinator.showWindow(
+                    id: "\(image.id.uuidString)-OCR",
+                    title: "\(image.size.width)x\(image.size.height)-OCR",
+                    content: OCRImageView(
+                        image: image
+                    ),
+                    size: windowSize,
+                    alwaysActiveFocusedLook: true,
+                    focusOnOpen: true
+                )
+            }
+        )
+
         stacksByDisplay[display] = stack
         return stack
     }

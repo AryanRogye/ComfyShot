@@ -15,6 +15,7 @@ struct AppKitOverflowGallery: NSViewRepresentable {
     let rotation: (Int) -> Double
     let verticalOffset: (Int) -> CGFloat
     let onClose: (UserImage) -> Void
+    let onOCR: (UserImage) -> Void
     let onEditImage: (UserImage) -> Void
     let onShiftClick: (UserImage) -> Void
     let isShiftClicked: (UserImage) -> Bool
@@ -86,6 +87,7 @@ struct AppKitOverflowGallery: NSViewRepresentable {
         fileprivate var rotation: (Int) -> Double
         fileprivate var verticalOffset: (Int) -> CGFloat
         fileprivate var onClose: (UserImage) -> Void
+        fileprivate var onOCR: (UserImage) -> Void
         fileprivate var onEditImage: (UserImage) -> Void
         fileprivate var onShiftClick: (UserImage) -> Void
 
@@ -98,6 +100,7 @@ struct AppKitOverflowGallery: NSViewRepresentable {
             rotation = parent.rotation
             verticalOffset = parent.verticalOffset
             onClose = parent.onClose
+            onOCR = parent.onOCR
             onEditImage = parent.onEditImage
             onShiftClick = parent.onShiftClick
             shiftClickedImages = parent.shiftClickedImages
@@ -160,6 +163,10 @@ struct AppKitOverflowGallery: NSViewRepresentable {
                 onClose: { [weak self] image in
                     guard let self else { return }
                     self.onClose(image)
+                },
+                onOCR: { [weak self] image in
+                    guard let self else { return }
+                    self.onOCR(image)
                 },
                 onEditImage: { [weak self] image in
                     guard let self else { return }
@@ -244,6 +251,7 @@ private final class OverflowGalleryItem: NSCollectionViewItem {
         count: Int,
         isShiftClicked: Bool,
         onClose: @escaping (UserImage) -> Void,
+        onOCR: @escaping (UserImage) -> Void,
         onEditImage: @escaping (UserImage) -> Void,
         onShiftClick: @escaping (UserImage) -> Void
     ) {
@@ -256,6 +264,7 @@ private final class OverflowGalleryItem: NSCollectionViewItem {
                 dragURL: userImage.dragURL,
                 shadowStyle: .compact,
                 onClose: { onClose(userImage) },
+                onOCR: { onOCR(userImage) },
                 onEditImage: { onEditImage(userImage) },
                 onShiftClick: { onShiftClick(userImage) }
             )

@@ -15,6 +15,7 @@ struct ImageContainer: View {
     let spacing: CGFloat
     let layout: ImageStackOverflowLayout
     let onClose: (UserImage) -> Void
+    let onOCR: (UserImage) -> Void
     let onEditImage: (UserImage) -> Void
     let onShiftClick: (UserImage) -> Void
 
@@ -40,6 +41,7 @@ struct ImageContainer: View {
                     layout: layout,
                     pendingGalleryCollapse: $pendingGalleryCollapse,
                     onClose: onClose,
+                    onOCR: onOCR,
                     onEditImage: onEditImage,
                     onShiftClick: onShiftClick
                 )
@@ -53,6 +55,7 @@ struct ImageContainer: View {
                     isShiftClicked: model.shiftClickedImages.contains(where: { $0.id == userImage.id}),
                     dragURL: userImage.dragURL,
                     onClose: { onClose(userImage) },
+                    onOCR: { onOCR(userImage) },
                     onEditImage: { onEditImage(userImage) },
                     onShiftClick: { onShiftClick(userImage) }
                 )

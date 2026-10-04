@@ -14,6 +14,7 @@ struct OverflowSection: View {
     let layout: ImageStackOverflowLayout
     @Binding var pendingGalleryCollapse: Task<Void, Never>?
     let onClose: (UserImage) -> Void
+    let onOCR: (UserImage) -> Void
     let onEditImage: (UserImage) -> Void
     let onShiftClick: (UserImage) -> Void
 
@@ -48,6 +49,7 @@ struct OverflowSection: View {
                     rotation: fanRotation,
                     verticalOffset: fanVerticalOffset,
                     onClose: onClose,
+                    onOCR: onOCR,
                     onEditImage: onEditImage,
                     onShiftClick: onShiftClick,
                     isShiftClicked: { image in

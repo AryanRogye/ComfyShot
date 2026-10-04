@@ -30,7 +30,9 @@ final class DisplayImageStack {
     }
 
     let onEditImage: (UserImage) -> Void
-    
+
+    let onOCR: (UserImage) -> Void
+
     /// Floating panel shown on the display.
     /// Created lazily the first time an image is added.
     private var panel: NSPanel?
@@ -42,8 +44,12 @@ final class DisplayImageStack {
     /// Property to indicate if model has any shift clicked images
     private(set) var containsShiftClickedImages = false
 
-    public init(onEditImage: @escaping (UserImage) -> Void) {
+    public init(
+        onEditImage: @escaping (UserImage) -> Void,
+        onOCR: @escaping (UserImage) -> Void
+    ) {
         self.onEditImage = onEditImage
+        self.onOCR = onOCR
     }
     
     func addImage(_ userImage: UserImage) {
@@ -85,6 +91,10 @@ final class DisplayImageStack {
                 if self.model.images.isEmpty {
                     self.closePanel()
                 }
+            },
+            onOCR: { [weak self] image in
+                guard let self else { return }
+                self.onOCR(image)
             },
             onEditImage: { [weak self] image in
                 guard let self else { return }

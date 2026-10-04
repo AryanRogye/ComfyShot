@@ -27,6 +27,7 @@ struct UserImageView: View {
     let dragURL: URL?
     var shadowStyle: ShadowStyle = .regular
     let onClose: () -> Void
+    let onOCR: () -> Void
     let onEditImage: () -> Void
     let onShiftClick: () -> Void
 
@@ -82,6 +83,7 @@ struct UserImageView: View {
                 hovering: hovering,
                 dragURL: dragURL,
                 onClose: onClose,
+                onOCR: onOCR,
                 onEditImage: onEditImage
             )
         )
@@ -118,6 +120,7 @@ private struct UserImageControlsModifier: ViewModifier {
     let hovering: Bool
     let dragURL: URL?
     let onClose: () -> Void
+    let onOCR: () -> Void
     let onEditImage: () -> Void
 
     func body(content: Content) -> some View {
@@ -139,6 +142,12 @@ private struct UserImageControlsModifier: ViewModifier {
                             Spacer(minLength: 8)
 
                             HStack(spacing: 8) {
+                                Button(action: onOCR) {
+                                    Image(systemName: "doc.text.viewfinder")
+                                        .modifier(UserImageControlLabelModifier())
+                                }
+                                .buttonStyle(.plain)
+
                                 Button(action: onEditImage) {
                                     Image(systemName: "pencil.tip")
                                         .modifier(UserImageControlLabelModifier())
