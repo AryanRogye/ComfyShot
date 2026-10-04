@@ -5,6 +5,7 @@
 //  Created by Aryan Rogye on 6/30/26.
 //
 
+import AppKit
 import CoreGraphics
 import Observation
 
@@ -14,6 +15,9 @@ final class CaptureAreaModel {
 
     var dragStart: CGPoint?
     var dragCurrent: CGPoint?
+    /// Overlay-local position and image of the cursor while input is intercepted.
+    var virtualCursorLocation: CGPoint?
+    var virtualCursor: NSCursor = .crosshair
     private var initialMoveStart: CGPoint?
     private var initialMoveCurrent: CGPoint?
     private var initialResizeRect: CGRect?

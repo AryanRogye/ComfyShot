@@ -17,8 +17,7 @@ CaptureArea/Input/
 |   updates the cursor during hover and drag.
 |
 +-- SystemCursorController.swift
-    Cursor adapter: maps a requested shape to NSCursor and applies/clears
-    the intercepted cursor override.
+    Hides and parks the hardware cursor during capture, then restores it.
 ```
 
 ## Event and action flow
@@ -32,7 +31,8 @@ ComfyShotInputBridge.start(contexts, cancel, clearSelection)
         |
         +---- CaptureInputInterceptor.start(callbacks)
         |          |
-        |          +-- installs a session CGEvent tap on the main run loop
+        |          +-- installs a HID CGEvent tap on the main run loop
+        |          +-- builds a virtual position from raw mouse deltas
         |          +-- mouse down / drag / up --> bridge callbacks
         |          +-- Enter --> capture selected rect
         |          +-- Escape --> cancel
@@ -40,7 +40,7 @@ ComfyShotInputBridge.start(contexts, cancel, clearSelection)
         |          +-- Delete --> clear selection
         |          +-- scroll / secondary buttons / other keys --> consumed
         |
-        +---- on success: disable panel cursor rects and start hover timer
+        +---- on success: disable panel cursor rects and draw a virtual cursor
         |     on failure: coordinator can use regular AppKit panel input
         v
 ComfyShotInputBridge
@@ -54,13 +54,10 @@ ComfyShotInputBridge
         |      Shift + selection            --> 3x3 grid: center moves,
         |                                      outer cells resize
         +-- call that context.model to update/end draw, move, or resize
-        +-- request crosshair, hand, or resize cursor
-                   |
-                   v
-        SystemCursorController
-                   |
-                   +-- applies CaptureCursorOverride cursor
-                   +-- clears override when the input session stops
+        +-- draw crosshair, hand, or resize image in SelectionOverlay
+
+SystemCursorController hides and parks the hardware cursor while the overlay
+is visible, then restores it at the virtual position when capture ends.
 ```
 
 ## Session end
@@ -68,8 +65,8 @@ ComfyShotInputBridge
 ```text
 Escape / capture / coordinator hide
         -> ComfyShotInputBridge.stop()
-        -> stop timer and event tap
-        -> clear cursor override
+        -> stop event tap and cursor visibility timer
+        -> restore hardware cursor and clear virtual cursor
         -> re-enable any panel cursor rects disabled at start
         -> clear overlay, drag, and modifier state
 ```

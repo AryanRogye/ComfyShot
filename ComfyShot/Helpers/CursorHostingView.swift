@@ -50,17 +50,17 @@ enum CaptureCursorOverride {
         interceptedCursor ?? cursor ?? defaultCursor
     }
 
-    static var isIntercepting: Bool {
-        interceptedCursor != nil
-    }
+    static var isIntercepting: Bool = false
 
     /// Keep the cursor rect and the intercepted input path on the same shape.
     static func setInterceptedCursor(_ newCursor: NSCursor) {
+        isIntercepting = true
         interceptedCursor = newCursor
         newCursor.set()
     }
 
     static func clearInterceptedCursor() {
+        isIntercepting = false
         interceptedCursor = nil
         cursor = nil
     }
@@ -101,6 +101,10 @@ final class CursorHostingView<Content: View>: NSHostingView<Content> {
     }
     
     override func resetCursorRects() {
+        guard !CaptureCursorOverride.isIntercepting else {
+            discardCursorRects()
+            return
+        }
         super.resetCursorRects()
         addCursorRect(bounds, cursor: currentCursor)
     }
@@ -128,14 +132,18 @@ final class CursorHostingView<Content: View>: NSHostingView<Content> {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         window?.acceptsMouseMovedEvents = true
-        currentCursor.set()
+        if !CaptureCursorOverride.isIntercepting {
+            currentCursor.set()
+        }
     }
     
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
         if let old = trackingArea {
             removeTrackingArea(old)
+            trackingArea = nil
         }
+        guard !CaptureCursorOverride.isIntercepting else { return }
         let options: NSTrackingArea.Options = [
             .mouseMoved,
             .cursorUpdate,

@@ -69,8 +69,7 @@ final class CaptureAreaCoordinator {
         
         guard let keyOverlay = overlayForMouse() ?? overlayContexts.map(\.panel).first else { return }
 
-        /// Intercept session input before it reaches apps while allowing
-        /// WindowServer to move the system cursor normally.
+        /// Intercept input before it reaches apps and draw the cursor in the overlay.
         let inputInterceptorStarted = appleScreenshotInputBridge.start(
             contexts: overlayContexts,
             onCancel: { [weak self] in
@@ -88,18 +87,25 @@ final class CaptureAreaCoordinator {
 
         for overlayScreen in overlayContexts.map(\.panel) {
             overlayScreen.orderFrontRegardless()
-            // Keep cursor hit testing on the topmost capture panel. The event
-            // tap still consumes input before the panel or underlying app sees it.
-            overlayScreen.ignoresMouseEvents = false
 
-            if !inputInterceptorStarted && overlayScreen === keyOverlay {
-                overlayScreen.makeKey()
-                overlayScreen.makeFirstResponder(overlayScreen.contentView)
+            if !inputInterceptorStarted {
+                // Without event tap, panels must receive events normally.
+                overlayScreen.ignoresMouseEvents = false
+                if overlayScreen === keyOverlay {
+                    overlayScreen.makeKey()
+                    overlayScreen.makeFirstResponder(overlayScreen.contentView)
+                }
+                applyCrosshairCursor(to: overlayScreen)
+            } else {
+                // Event tap owns all input. Make panels invisible to
+                // WindowServer hit testing and cursor rect evaluation.
+                overlayScreen.ignoresMouseEvents = true
+                overlayScreen.discardCursorRects()
+                overlayScreen.disableCursorRects()
             }
-            applyCrosshairCursor(to: overlayScreen)
         }
 
-        if inputInterceptorStarted { appleScreenshotInputBridge.refreshCursor() }
+        if inputInterceptorStarted { appleScreenshotInputBridge.hideSystemCursor() }
     }
     
     public func hide() {

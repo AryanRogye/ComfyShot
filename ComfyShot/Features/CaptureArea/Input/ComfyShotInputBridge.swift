@@ -12,7 +12,7 @@ import CoreGraphics
 ///
 /// `CaptureInputInterceptor` owns the macOS event system. This bridge owns the
 /// capture meaning of those events: choosing a display, drawing a selection,
-/// moving it, resizing it, and setting the system cursor shape.
+/// moving it, resizing it, and drawing the virtual cursor.
 ///
 /// The name is historical. The bridge originally existed only for capturing
 /// over Apple's screenshot UI, but it now drives every isolated area capture.
@@ -32,7 +32,6 @@ final class ComfyShotInputBridge {
     }
 
     private let inputInterceptor = CaptureInputInterceptor()
-    private let cursorController = SystemCursorController()
     private var overlayContexts: [OverlayContext] = []
     private var panelsWithDisabledCursorRects: [NSPanel] = []
 
@@ -65,7 +64,12 @@ final class ComfyShotInputBridge {
             mouseDragged: { [weak self] in self?.handleMouseDragged(to: $0) },
             mouseUp: { [weak self] in self?.handleMouseUp(at: $0) },
             cancel: onCancel,
-            clearSelection: onClearSelection,
+            clearSelection: { [weak self] in
+                onClearSelection()
+                if let point = self?.lastPointerLocation {
+                    self?.updateCursor(at: point)
+                }
+            },
             isShiftHeld: { [weak self] held in
                 self?.isShiftHeld = held
                 if let point = self?.lastPointerLocation {
@@ -76,9 +80,17 @@ final class ComfyShotInputBridge {
         )
 
         if didStart {
-            for context in overlayContexts where context.panel.areCursorRectsEnabled {
-                context.panel.disableCursorRects()
-                panelsWithDisabledCursorRects.append(context.panel)
+            CaptureCursorOverride.isIntercepting = true
+            for context in overlayContexts {
+                context.panel.discardCursorRects()
+                if context.panel.areCursorRectsEnabled {
+                    context.panel.disableCursorRects()
+                    panelsWithDisabledCursorRects.append(context.panel)
+                }
+                if let contentView = context.panel.contentView {
+                    contentView.discardCursorRects()
+                    contentView.updateTrackingAreas()
+                }
             }
             let pointerLocation = NSEvent.mouseLocation
             lastPointerLocation = pointerLocation
@@ -92,9 +104,20 @@ final class ComfyShotInputBridge {
     /// Ends input interception and clears every piece of session-only state.
     func stop() {
         inputInterceptor.stop()
-        cursorController.stop()
+        for context in overlayContexts {
+            context.model.virtualCursorLocation = nil
+            context.model.virtualCursor = .crosshair
+        }
+        CaptureCursorOverride.isIntercepting = false
+        for context in overlayContexts {
+            context.panel.ignoresMouseEvents = false
+        }
         for panel in panelsWithDisabledCursorRects {
             panel.enableCursorRects()
+            if let contentView = panel.contentView {
+                panel.invalidateCursorRects(for: contentView)
+                contentView.updateTrackingAreas()
+            }
         }
         panelsWithDisabledCursorRects = []
         overlayContexts = []
@@ -104,9 +127,9 @@ final class ComfyShotInputBridge {
         isShiftHeld = false
     }
 
-    /// Restores the capture cursor after the panels install their cursor rects.
-    func refreshCursor() {
-        updateCursor(at: lastPointerLocation ?? NSEvent.mouseLocation, force: true)
+    /// Hides the hardware cursor after all overlay panels are visible.
+    func hideSystemCursor() {
+        inputInterceptor.hideSystemCursor()
     }
 }
 
@@ -143,10 +166,10 @@ extension ComfyShotInputBridge {
             switch selectionGridRegion(at: localPoint, in: selectionRect) {
             case .resize(let edge):
                 dragOperation = .resizing(edge: edge, startPoint: localPoint)
-                cursorController.setCursor(.resize(edge))
+                updateCursor(at: globalPoint)
             case .center:
                 dragOperation = .moving(startPoint: localPoint)
-                cursorController.setCursor(.closedHand)
+                updateCursor(at: globalPoint)
             case nil:
                 dragOperation = nil
             }
@@ -156,11 +179,11 @@ extension ComfyShotInputBridge {
             // A click on a resize handle starts resizing from that edge.
             if let edge = resizeEdge(at: localPoint, in: selectionRect) {
                 dragOperation = .resizing(edge: edge, startPoint: localPoint)
-                cursorController.setCursor(.resize(edge))
+                updateCursor(at: globalPoint)
                 // A click inside the selection starts moving it.
             } else if selectionRect.contains(localPoint) {
                 dragOperation = .moving(startPoint: localPoint)
-                cursorController.setCursor(.closedHand)
+                updateCursor(at: globalPoint)
                 // A click outside the selection starts drawing a replacement.
             } else {
                 beginDrawing(at: localPoint, in: context)
@@ -234,39 +257,51 @@ extension ComfyShotInputBridge {
     }
 }
 
-// MARK: - System Cursor
+// MARK: - Virtual Cursor
 extension ComfyShotInputBridge {
-    private func updateCursor(at globalPoint: CGPoint, force: Bool = false) {
+    private func updateCursor(at globalPoint: CGPoint) {
+        let shape: NSCursor
         if let dragOperation {
             switch dragOperation {
             case .drawing:
-                cursorController.setCursor(.crosshair, force: force)
+                shape = .crosshair
             case .moving:
-                cursorController.setCursor(.closedHand, force: force)
+                shape = .closedHand
             case .resizing(let edge, _):
-                cursorController.setCursor(.resize(edge), force: force)
+                shape = CaptureCursorOverride.resizeCursor(for: edge)
             }
+            drawCursor(shape, at: globalPoint)
             return
         }
         guard let context = overlayContext(containing: globalPoint),
               let localPoint = localOverlayPoint(for: globalPoint, in: context.panel),
               let selectionRect = context.model.selectionRect else {
-            cursorController.setCursor(.crosshair, force: force)
+            drawCursor(.crosshair, at: globalPoint)
             return
         }
 
         if isShiftHeld {
             switch selectionGridRegion(at: localPoint, in: selectionRect) {
-            case .resize(let edge): cursorController.setCursor(.resize(edge), force: force)
-            case .center: cursorController.setCursor(.openHand, force: force)
-            case nil: cursorController.setCursor(.crosshair, force: force)
+            case .resize(let edge): shape = CaptureCursorOverride.resizeCursor(for: edge)
+            case .center: shape = .openHand
+            case nil: shape = .crosshair
             }
         } else if let edge = resizeEdge(at: localPoint, in: selectionRect) {
-            cursorController.setCursor(.resize(edge), force: force)
+            shape = CaptureCursorOverride.resizeCursor(for: edge)
         } else if selectionRect.contains(localPoint) {
-            cursorController.setCursor(.openHand, force: force)
+            shape = .openHand
         } else {
-            cursorController.setCursor(.crosshair, force: force)
+            shape = .crosshair
+        }
+        drawCursor(shape, at: globalPoint)
+    }
+
+    private func drawCursor(_ cursor: NSCursor, at globalPoint: CGPoint) {
+        for context in overlayContexts {
+            context.model.virtualCursorLocation = localOverlayPoint(for: globalPoint, in: context.panel)
+            if context.model.virtualCursorLocation != nil {
+                context.model.virtualCursor = cursor
+            }
         }
     }
 }
@@ -340,16 +375,20 @@ extension ComfyShotInputBridge {
     /// Finds the overlay beneath an AppKit global screen point.
     private func overlayContext(containing globalPoint: CGPoint) -> OverlayContext? {
         overlayContexts.first {
-            NSMouseInRect(globalPoint, $0.panel.frame, false)
+            let frame = $0.panel.frame
+            return globalPoint.x >= frame.minX && globalPoint.x <= frame.maxX
+                && globalPoint.y >= frame.minY && globalPoint.y <= frame.maxY
         }
     }
 
     /// Converts bottom-left global coordinates into top-left SwiftUI coordinates.
     private func localOverlayPoint(for globalPoint: CGPoint, in panel: NSPanel) -> CGPoint? {
-        guard panel.frame.contains(globalPoint) else { return nil }
+        let frame = panel.frame
+        guard globalPoint.x >= frame.minX && globalPoint.x <= frame.maxX
+            && globalPoint.y >= frame.minY && globalPoint.y <= frame.maxY else { return nil }
         return CGPoint(
-            x: globalPoint.x - panel.frame.minX,
-            y: panel.frame.maxY - globalPoint.y
+            x: globalPoint.x - frame.minX,
+            y: frame.maxY - globalPoint.y
         )
     }
 }
